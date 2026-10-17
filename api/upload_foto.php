@@ -1,0 +1,46 @@
+<?php
+header('Content-Type: application/json');
+require_once '../config/koneksi.php';
+
+// Validasi: pastikan id_kamar dan file foto tersedia
+if (!isset($_POST['id_kamar']) || !isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap atau file bermasalah.']);
+    exit;
+}
+
+$id_kamar = intval($_POST['id_kamar']);
+
+// Validasi tipe file (hanya gambar)
+$allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+$file_type = mime_content_type($_FILES['foto']['tmp_name']);
+if (!in_array($file_type, $allowed_types)) {
+    echo json_encode(['status' => 'error', 'message' => 'Format file tidak didukung. Gunakan JPG, PNG, atau WEBP.']);
+    exit;
+}
+
+// Validasi ukuran file (maks 2MB)
+if ($_FILES['foto']['size'] > 2 * 1024 * 1024) {
+    echo json_encode(['status' => 'error', 'message' => 'Ukuran file terlalu besar. Maksimal 2MB.']);
+    exit;
+}
+
+// Buat nama file unik
+$ext       = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+$nama_file = 'kamar_' . $id_kamar . '_' . time() . '.' . $ext;
+$upload_dir = __DIR__ . '/../public/uploads/';
+$target    = $upload_dir . $nama_file;
+
+// Pindahkan file ke folder uploads
+if (move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
+    // Update kolom gambar di database
+    $query = "UPDATE kamar SET gambar = '$nama_file' WHERE id = $id_kamar";
+    if (mysqli_query($koneksi, $query)) {
+        echo json_encode(['status' => 'success', 'message' => 'Foto berhasil diupload!', 'file' => $nama_file]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal update database: ' . mysqli_error($koneksi)]);
+    }
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Gagal memindahkan file upload.']);
+}
+?>
+

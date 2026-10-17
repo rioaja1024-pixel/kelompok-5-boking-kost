@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Kost</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ===== APP SHELL ===== -->
+    <div class="app-shell">
+
+        <!-- TOP NAV -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <div class="location-tag">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                    Bandung, Indonesia
+                </div>
+                <h1 class="nav-title">Discover</h1>
+            </div>
+            <button class="btn-icon" id="btnSearch" title="Cari">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+        </header>
+
+        <!-- SEARCH BAR (hidden by default) -->
+        <div class="search-bar-wrap" id="searchBarWrap" style="display:none;">
+            <input type="text" id="searchInput" placeholder="Cari nama kamar..." class="search-input">
+        </div>
+
+        <!-- FILTER TABS -->
+        <div class="filter-tabs">
+            <button class="tab-btn active" data-filter="all">Semua</button>
+            <button class="tab-btn" data-filter="kosong">Tersedia</button>
+            <button class="tab-btn" data-filter="terisi">Terisi</button>
+        </div>
+
+        <!-- MAIN SCROLL AREA -->
+        <main class="main-scroll">
+
+            <!-- STATUS GRID -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-title">Status Kamar</span>
+                    <span class="section-sub" id="jumlahKosong">—</span>
+                </div>
+                <div id="gridIndikatorKamar" class="status-grid"></div>
+            </section>
+
+            <!-- KATALOG KAMAR -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-title">Pilihan Unit</span>
+                    <span class="section-link">Lihat semua</span>
+                </div>
+                <div id="katalogKamar" class="card-grid"></div>
+            </section>
+
+            <!-- FORM BOOKING -->
+            <section class="section booking-section" id="sectionBooking">
+                <div class="section-header">
+                    <span class="section-title">Form Pemesanan</span>
+                </div>
+
+                <form id="formBooking" class="booking-form">
+                    <!-- Unit terpilih (readonly) -->
+                    <div class="form-group">
+                        <label class="form-label">Unit Dipilih</label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
+                            <input type="text" id="unitPilihan" name="unit" readonly
+                                placeholder="Klik 'Book Now' pada kamar di atas"
+                                class="form-input" required>
+                        </div>
+                    </div>
+
+                    <!-- Nama pemesan -->
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap</label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            <input type="text" name="nama" placeholder="Masukkan nama lengkap" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <!-- Durasi -->
+                    <div class="form-group">
+                        <label class="form-label">Durasi Sewa</label>
+                        <div class="durasi-control">
+                            <button type="button" class="durasi-btn" id="btnKurang">−</button>
+                            <div class="durasi-display">
+                                <input type="number" id="durasiBulan" name="durasi" value="1" min="1" class="durasi-input" required>
+                                <span class="durasi-label">Bulan</span>
+                            </div>
+                            <button type="button" class="durasi-btn" id="btnTambah">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Total harga -->
+                    <div class="total-box">
+                        <span class="total-label">Total Pembayaran</span>
+                        <span class="total-nilai" id="totalHargaDisplay">Rp 0</span>
+                        <input type="hidden" id="totalHargaVal" name="total" value="0">
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="btn-book-now">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                        Kirim Booking
+                    </button>
+                </form>
+            </section>
+
+        </main>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" id="navBeranda">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span>Beranda</span>
+            </button>
+            <button class="nav-item" id="navBooking" onclick="document.getElementById('sectionBooking').scrollIntoView({behavior:'smooth'})">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Booking</span>
+            </button>
+            <button class="nav-item" id="navProfil">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <span>Profil</span>
+            </button>
+        </nav>
+
+    </div><!-- /app-shell -->
+
+    <!-- ===== MODAL DETAIL KAMAR ===== -->
+    <div id="modalDetail" class="modal-overlay" style="display:none;">
+        <div class="detail-sheet">
+            <div class="detail-foto-wrap">
+                <img id="detailFoto" src="" alt="" class="detail-foto">
+                <button class="btn-back" onclick="tutupDetail()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="detail-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+            </div>
+            <div class="detail-body">
+                <div class="detail-top-row">
+                    <div>
+                        <h2 id="detailNama" class="detail-nama"></h2>
+                        <div class="detail-loc">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                            Bandung, Indonesia
+                        </div>
+                    </div>
+                    <div class="detail-rating">
+                        ★★★★☆ <span>4.0</span>
+                    </div>
+                </div>
+                <p class="detail-desc">Kamar bersih dan nyaman dengan fasilitas lengkap. Cocok untuk mahasiswa dan pekerja. Tersedia parkir dan keamanan 24 jam.</p>
+                <div class="detail-price-row">
+                    <span id="detailHarga" class="detail-price"></span>
+                    <span id="detailBadge" class="detail-status-badge"></span>
+                </div>
+                <button id="btnBookDetail" class="btn-book-now" style="margin-top:16px;">
+                    Book Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL METODE PEMBAYARAN ===== -->
+    <div id="modalPembayaran" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-icon">💳</div>
+            <h2 class="modal-title">Pilih Pembayaran</h2>
+            <p class="modal-subtitle">Total yang harus dibayar:</p>
+
+            <div class="total-tagihan">
+                <span id="tagihanDisplay">Rp 0</span>
+            </div>
+
+            <div class="metode-list">
+
+                <button class="metode-item" onclick="pilihMetode('E-Wallet')">
+                    <div class="metode-icon ewallet-icon">📱</div>
+                    <div class="metode-info">
+                        <span class="metode-nama">E-Wallet</span>
+                        <span class="metode-sub">GoPay · OVO · Dana · ShopeePay</span>
+                    </div>
+                    <span class="metode-arrow">›</span>
+                </button>
+
+                <button class="metode-item" onclick="pilihMetode('QRIS')">
+                    <div class="metode-icon qris-icon">⬛</div>
+                    <div class="metode-info">
+                        <span class="metode-nama">QRIS</span>
+                        <span class="metode-sub">Scan QR · Semua aplikasi diterima</span>
+                    </div>
+                    <span class="metode-arrow">›</span>
+                </button>
+
+                <button class="metode-item" onclick="pilihMetode('Tunai / Cash')">
+                    <div class="metode-icon cash-icon">💵</div>
+                    <div class="metode-info">
+                        <span class="metode-nama">Tunai / Cash</span>
+                        <span class="metode-sub">Bayar langsung ke pemilik kost</span>
+                    </div>
+                    <span class="metode-arrow">›</span>
+                </button>
+
+            </div>
+
+            <button class="btn-tutup" id="btnBatalPembayaran" style="margin-top:12px;">Batalkan</button>
+        </div>
+    </div>
+
+    <!-- ===== MODAL SUKSES BOOKING ===== -->
+    <div id="modalSukses" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-icon">✅</div>
+            <h2 class="modal-title">Booking Berhasil!</h2>
+            <p class="modal-subtitle">Terima kasih! Detail pesanan kamu:</p>
+            <div class="modal-detail">
+                <div class="detail-row"><span class="detail-label">📋 Unit</span><span class="detail-value" id="popupUnit">-</span></div>
+                <div class="detail-row"><span class="detail-label">👤 Nama</span><span class="detail-value" id="popupNama">-</span></div>
+                <div class="detail-row"><span class="detail-label">📅 Durasi</span><span class="detail-value" id="popupDurasi">-</span></div>
+                <div class="detail-row"><span class="detail-label">💳 Pembayaran</span><span class="detail-value" id="popupMetode" style="color:#4f46e5;font-weight:700;">-</span></div>
+                <div class="detail-row"><span class="detail-label">💰 Total</span><span class="detail-value" id="popupTotal" style="color:#4f46e5;font-weight:700;">-</span></div>
+            </div>
+            <p class="modal-info">Lanjutkan konfirmasi lewat WhatsApp:</p>
+            <div class="modal-actions">
+                <a id="btnWhatsapp" href="#" target="_blank" class="btn-wa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-right:8px;flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.114.549 4.1 1.508 5.83L.057 23.5a.5.5 0 0 0 .614.614l5.67-1.451A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.9 9.9 0 0 1-5.031-1.371l-.361-.214-3.735.956.989-3.617-.235-.374A9.861 9.861 0 0 1 2.1 12C2.1 6.533 6.533 2.1 12 2.1S21.9 6.533 21.9 12 17.467 21.9 12 21.9z"/></svg>
+                    Chat via WhatsApp
+                </a>
+                <button id="btnTutupModal" class="btn-tutup">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

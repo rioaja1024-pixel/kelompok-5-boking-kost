@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Upload Foto Kamar</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+        .admin-header {
+            background: #343a40;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .upload-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .upload-card img.preview-foto {
+            width: 120px;
+            height: 85px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        .upload-card .upload-info {
+            flex: 1;
+        }
+        .upload-card h3 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+        .upload-card .harga-kecil {
+            font-size: 13px;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .upload-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .input-foto {
+            font-size: 13px;
+            flex: 1;
+            min-width: 0;
+        }
+        .btn-upload {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .btn-upload:hover { background: #0056b3; }
+        .status-msg {
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .status-ok  { color: #28a745; }
+        .status-err { color: #dc3545; }
+        @media (max-width: 500px) {
+            .upload-card { flex-direction: column; align-items: flex-start; }
+            .upload-card img.preview-foto { width: 100%; height: 150px; }
+        }
+    </style>
+</head>
+<body style="background:#f4f6f9;">
+
+    <header style="background:#343a40; color:white; text-align:center; padding:15px;">
+        <h1>🛠 Admin — Upload Foto Kamar</h1>
+    </header>
+
+    <div class="admin-container">
+        <p style="color:#666; margin-bottom:20px;">
+            Upload foto untuk setiap unit kamar. Format: JPG, PNG, WEBP. Maks 2MB.
+        </p>
+
+        <div id="listKamar">
+            <p>Memuat data kamar...</p>
+        </div>
+
+        <p style="margin-top:24px; text-align:center;">
+            <a href="index.html" style="color:#007bff;">← Kembali ke halaman utama</a>
+        </p>
+    </div>
+
+    <script>
+        // Muat daftar kamar dari API
+        fetch('../api/get_kamar.php')
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('listKamar');
+                container.innerHTML = '';
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p>Belum ada data kamar.</p>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const fotoSrc = (item.gambar && item.gambar.trim() !== '')
+                        ? `../public/uploads/${item.gambar}`
+                        : `https://placehold.co/120x85/e8f5e9/28a745?text=No+Photo`;
+
+                    const card = document.createElement('div');
+                    card.className = 'upload-card';
+                    card.innerHTML = `
+                        <img src="${fotoSrc}" alt="Foto ${item.nama_kamar}" class="preview-foto" id="preview-${item.id}"
+                             onerror="this.src='https://placehold.co/120x85/e8f5e9/28a745?text=No+Photo'">
+                        <div class="upload-info">
+                            <h3>${item.nama_kamar}</h3>
+                            <p class="harga-kecil">Rp ${parseInt(item.harga).toLocaleString('id-ID')} / bulan</p>
+                            <div class="upload-row">
+                                <input type="file" class="input-foto" id="file-${item.id}" accept="image/*">
+                                <button class="btn-upload" onclick="uploadFoto(${item.id})">Upload</button>
+                            </div>
+                            <div class="status-msg" id="status-${item.id}"></div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+
+                    // Preview foto sebelum upload
+                    document.getElementById(`file-${item.id}`).addEventListener('change', function() {
+                        const file = this.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = e => {
+                                document.getElementById(`preview-${item.id}`).src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                });
+            })
+            .catch(err => {
+                document.getElementById('listKamar').innerHTML = '<p style="color:red;">Gagal memuat data kamar.</p>';
+                console.error(err);
+            });
+
+        // Fungsi upload foto ke API
+        function uploadFoto(idKamar) {
+            const fileInput = document.getElementById(`file-${idKamar}`);
+            const statusEl = document.getElementById(`status-${idKamar}`);
+
+            if (!fileInput.files[0]) {
+                statusEl.textContent = '⚠ Pilih file terlebih dahulu.';
+                statusEl.className = 'status-msg status-err';
+                return;
+            }
+
+            statusEl.textContent = 'Mengupload...';
+            statusEl.className = 'status-msg';
+
+            const formData = new FormData();
+            formData.append('id_kamar', idKamar);
+            formData.append('foto', fileInput.files[0]);
+
+            fetch('../api/upload_foto.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    statusEl.textContent = '✅ ' + res.message;
+                    statusEl.className = 'status-msg status-ok';
+                } else {
+                    statusEl.textContent = '❌ ' + res.message;
+                    statusEl.className = 'status-msg status-err';
+                }
+            })
+            .catch(err => {
+                statusEl.textContent = '❌ Koneksi gagal.';
+                statusEl.className = 'status-msg status-err';
+                console.error(err);
+            });
+        }
+    </script>
+
+</body>
+</html>
+
