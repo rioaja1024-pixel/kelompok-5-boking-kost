@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>Booking Kost</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -238,6 +239,68 @@
             </div>
         </div>
     </div>
+=======
+    <title>Sistem Booking Kost</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header style="background: #007bff; color: white; text-align: center; padding: 15px;">
+        <h1>Sistem Booking Kost Online</h1>
+    </header>
+
+    <main style="max-width: 900px; margin: 20px auto; padding: 0 15px;">
+
+        <!-- 1. INDIKATOR DENAH / STATUS KAMAR -->
+        <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 25px;">
+            <h2>Status Ketersediaan Kamar</h2>
+            <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                🟢 <b>Kosong / Tersedia</b> &nbsp;|&nbsp; 🔴 <b>Terisi / Penuh</b>
+            </p>
+            <!-- Di sini kotak-kotak nomor kamar akan tampil otomatis -->
+            <div id="gridIndikatorKamar" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px;"></div>
+        </section>
+
+        <!-- 2. KATALOG DAFTAR UNIT -->
+        <section style="margin-bottom: 25px;">
+            <h2>Pilihan Unit Kost</h2>
+            <div id="katalogKamar" class="unit-container"></div>
+        </section>
+
+        <!-- 3. FORM PEMESANAN -->
+        <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+            <h2>Form Pemesanan Kost</h2>
+            <form id="formBooking">
+                <div style="margin-bottom: 12px;">
+                    <label>Unit Dipilih:</label>
+                    <input type="text" id="unitPilihan" name="unit" readonly placeholder="Klik tombol pilih unit di atas" style="width: 100%; padding: 8px; margin-top: 5px;" required>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label>Nama Pemesan:</label>
+                    <input type="text" name="nama" placeholder="Masukkan nama kamu" style="width: 100%; padding: 8px; margin-top: 5px;" required>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label>Durasi Sewa (Bulan):</label>
+                    <input type="number" id="durasiBulan" name="durasi" value="1" min="1" style="width: 100%; padding: 8px; margin-top: 5px;" required>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label>Total Harga:</label>
+                    <input type="text" id="totalHargaDisplay" readonly value="Rp 0" style="width: 100%; padding: 8px; margin-top: 5px; font-weight: bold; color: #28a745;">
+                    <!-- Input hidden untuk kirim angka total murni ke backend -->
+                    <input type="hidden" id="totalHargaVal" name="total" value="0">
+                </div>
+
+                <button type="submit" style="width: 100%; background: #28a745; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                    Kirim Booking
+                </button>
+            </form>
+        </section>
+
+    </main>
+>>>>>>> 63bbc246dda689808d6716536cf2a0652d77bb0b
 
     <script src="script.js"></script>
 </body>
