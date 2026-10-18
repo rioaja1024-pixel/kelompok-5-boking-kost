@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-require_once '../config/koneksi.php';
+require_once __DIR__ . '/../config/koneksi.php';
 
 // Validasi: pastikan id_kamar dan file foto tersedia
 if (!isset($_POST['id_kamar']) || !isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
@@ -18,9 +18,9 @@ if (!in_array($file_type, $allowed_types)) {
     exit;
 }
 
-// Validasi ukuran file (maks 2MB)
-if ($_FILES['foto']['size'] > 2 * 1024 * 1024) {
-    echo json_encode(['status' => 'error', 'message' => 'Ukuran file terlalu besar. Maksimal 2MB.']);
+// Validasi ukuran file (maks 5MB)
+if ($_FILES['foto']['size'] > 5 * 1024 * 1024) {
+    echo json_encode(['status' => 'error', 'message' => 'Ukuran file terlalu besar. Maksimal 5MB.']);
     exit;
 }
 
@@ -28,6 +28,9 @@ if ($_FILES['foto']['size'] > 2 * 1024 * 1024) {
 $ext       = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
 $nama_file = 'kamar_' . $id_kamar . '_' . time() . '.' . $ext;
 $upload_dir = __DIR__ . '/../public/uploads/';
+if (!is_dir($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
 $target    = $upload_dir . $nama_file;
 
 // Pindahkan file ke folder uploads
@@ -43,4 +46,3 @@ if (move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
     echo json_encode(['status' => 'error', 'message' => 'Gagal memindahkan file upload.']);
 }
 ?>
-

@@ -11,8 +11,8 @@ const dataKamarDefault = [
     { id: "1", nama_kamar: "Kamar 1", harga: 500000, gambar: "kamar_1_1792231112.png", status: "kosong" },
     { id: "2", nama_kamar: "Kamar 2", harga: 500000, gambar: "kamar_2_1792231111.png", status: "kosong" },
     { id: "3", nama_kamar: "Kamar 3", harga: 550000, gambar: "kamar_3_1792231110.png", status: "kosong" },
-    { id: "4", nama_kamar: "Kamar 4", harga: 550000, gambar: "kamar.jpg", status: "kosong" },
-    { id: "5", nama_kamar: "Kamar 5", harga: 600000, gambar: "kamar4.jpg", status: "kosong" },
+    { id: "4", nama_kamar: "Kamar 4", harga: 550000, gambar: "kamar4.jpg", status: "kosong" },
+    { id: "5", nama_kamar: "Kamar 5", harga: 600000, gambar: "kamar.jpg", status: "kosong" },
     { id: "6", nama_kamar: "Kamar 6", harga: 600000, gambar: "kamar6.jpg", status: "kosong" }
 ];
 
@@ -202,6 +202,20 @@ function renderSelectOptions(data) {
     }
 }
 
+// Helper untuk mendapatkan URL foto kamar yang valid
+function getFotoKamar(item) {
+    let foto = (item.gambar && item.gambar.trim() !== '') ? item.gambar.trim() : '';
+    if (!foto) {
+        if (item.nama_kamar.includes('4') || item.id == 4) foto = 'kamar4.jpg';
+        else if (item.nama_kamar.includes('5') || item.id == 5) foto = 'kamar.jpg';
+        else if (item.nama_kamar.includes('6') || item.id == 6) foto = 'kamar6.jpg';
+        else if (item.nama_kamar.includes('1') || item.id == 1) foto = 'kamar_1_1792231112.png';
+        else if (item.nama_kamar.includes('2') || item.id == 2) foto = 'kamar_2_1792231111.png';
+        else if (item.nama_kamar.includes('3') || item.id == 3) foto = 'kamar_3_1792231110.png';
+    }
+    return foto ? ('uploads/' + foto) : 'https://placehold.co/300x200/e8e7ff/4f46e5?text=' + encodeURIComponent(item.nama_kamar);
+}
+
 // Render status grid (kotak indikator ketersediaan)
 function renderStatusGrid(data) {
     const grid = document.getElementById('gridIndikatorKamar');
@@ -214,6 +228,7 @@ function renderStatusGrid(data) {
 
     data.forEach(function (item) {
         const isTerisi = item.status === 'terisi';
+        const fotoSrc  = getFotoKamar(item);
         const chip = document.createElement('div');
         chip.className = 'status-chip ' + (isTerisi ? 'terisi' : 'kosong');
         chip.innerHTML =
@@ -221,9 +236,6 @@ function renderStatusGrid(data) {
             '<span class="chip-status">' + (isTerisi ? '🔴 Terisi' : '🟢 Kosong') + '</span>';
         
         chip.addEventListener('click', function () {
-            const fotoSrc = (item.gambar && item.gambar.trim() !== '')
-                ? 'uploads/' + item.gambar
-                : 'https://placehold.co/300x200/e8e7ff/4f46e5?text=' + encodeURIComponent(item.nama_kamar);
             bukaDetail(item, fotoSrc);
         });
 
@@ -239,9 +251,7 @@ function renderKatalog(data) {
 
     data.forEach(function (item) {
         const isTerisi = item.status === 'terisi';
-        const fotoSrc = (item.gambar && item.gambar.trim() !== '')
-            ? 'uploads/' + item.gambar
-            : 'https://placehold.co/300x200/e8e7ff/4f46e5?text=' + encodeURIComponent(item.nama_kamar);
+        const fotoSrc  = getFotoKamar(item);
         const hargaFmt = 'Rp ' + parseInt(item.harga).toLocaleString('id-ID');
 
         const card = document.createElement('div');
