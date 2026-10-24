@@ -108,62 +108,87 @@
     </div>
 
     <script>
-        // Muat daftar kamar dari API
-        fetch('../api/get_kamar.php')
-            .then(r => r.json())
-            .then(data => {
-                const container = document.getElementById('listKamar');
-                container.innerHTML = '';
+        function loadAdminKamar() {
+            fetch('../api/get_kamar.php')
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('listKamar');
+                    container.innerHTML = '';
 
-                if (data.length === 0) {
-                    container.innerHTML = '<p>Belum ada data kamar.</p>';
-                    return;
-                }
+                    if (!Array.isArray(data) || data.length === 0) {
+                        container.innerHTML = '<p>Belum ada data kamar.</p>';
+                        return;
+                    }
 
-                data.forEach(item => {
-                    const fotoSrc = (item.gambar && item.gambar.trim() !== '')
-                        ? `uploads/${item.gambar}`
-                        : `https://placehold.co/120x85/e8f5e9/28a745?text=No+Photo`;
+                    data.forEach(item => {
+                        const fotoSrc = (item.gambar && item.gambar.trim() !== '')
+                            ? `uploads/${item.gambar}`
+                            : `https://placehold.co/120x85/e8f5e9/28a745?text=No+Photo`;
 
-                    const card = document.createElement('div');
-                    card.className = 'upload-card';
-                    card.innerHTML = `
-                        <img src="${fotoSrc}" alt="Foto ${item.nama_kamar}" class="preview-foto" id="preview-${item.id}"
-                             onerror="this.src='https://placehold.co/120x85/e8f5e9/28a745?text=No+Photo'">
-                        <div class="upload-info">
-                            <h3>${item.nama_kamar}</h3>
-                            <p class="harga-kecil">Rp ${parseInt(item.harga).toLocaleString('id-ID')} / bulan</p>
-                            <div class="upload-row">
-                                <input type="file" class="input-foto" id="file-${item.id}" accept="image/*">
-                                <button class="btn-upload" onclick="uploadFoto(${item.id})">Upload</button>
-                            </div>
-                            <div class="status-msg" id="status-${item.id}"></div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-
-                    // Preview foto sebelum upload
-                    document.getElementById(`file-${item.id}`).addEventListener('change', function() {
-                        const file = this.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = e => {
-                                document.getElementById(`preview-${item.id}`).src = e.target.result;
-                            };
-                            reader.readAsDataURL(file);
+                        // List thumbnail foto-foto slide yang ada di kamar ini
+                        let thumbnailsHtml = '';
+                        if (Array.isArray(item.fotos) && item.fotos.length > 0) {
+                            thumbnailsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px;">';
+                            item.fotos.forEach((f, idx) => {
+                                thumbnailsHtml += `
+                                    <div style="font-size:10px;text-align:center;width:75px;">
+                                        <img src="uploads/${f.file}" style="width:75px;height:50px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" onerror="this.src='https://placehold.co/75x50/eee/999?text=Error'">
+                                        <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555;font-weight:600;margin-top:2px;">${f.keterangan || ('Foto ' + (idx+1))}</div>
+                                    </div>
+                                `;
+                            });
+                            thumbnailsHtml += '</div>';
                         }
+
+                        const card = document.createElement('div');
+                        card.className = 'upload-card';
+                        card.innerHTML = `
+                            <img src="${fotoSrc}" alt="Foto ${item.nama_kamar}" class="preview-foto" id="preview-${item.id}"
+                                 onerror="this.src='https://placehold.co/120x85/e8f5e9/28a745?text=No+Photo'">
+                            <div class="upload-info">
+                                <h3>${item.nama_kamar}</h3>
+                                <p class="harga-kecil">Rp ${parseInt(item.harga).toLocaleString('id-ID')} / bulan</p>
+                                
+                                <div style="font-size:12px;font-weight:700;color:#333;margin-top:4px;">Foto-foto di slider saat ini:</div>
+                                ${thumbnailsHtml}
+
+                                <div class="upload-row" style="margin-top:6px;">
+                                    <input type="text" id="ket-${item.id}" placeholder="Keterangan (misal: Kamar Mandi / Kasur)" style="padding:6px 10px;font-size:12px;border:1px solid #ccc;border-radius:6px;flex:1;min-width:140px;">
+                                    <input type="file" class="input-foto" id="file-${item.id}" accept="image/*">
+                                    <button class="btn-upload" onclick="uploadFoto(${item.id})">Upload ke Slider</button>
+                                </div>
+                                <div class="status-msg" id="status-${item.id}"></div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+
+                        // Preview foto sebelum upload
+                        document.getElementById(`file-${item.id}`).addEventListener('change', function() {
+                            const file = this.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = e => {
+                                    document.getElementById(`preview-${item.id}`).src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
                     });
+                })
+                .catch(err => {
+                    document.getElementById('listKamar').innerHTML = '<p style="color:red;">Gagal memuat data kamar.</p>';
+                    console.error(err);
                 });
-            })
-            .catch(err => {
-                document.getElementById('listKamar').innerHTML = '<p style="color:red;">Gagal memuat data kamar.</p>';
-                console.error(err);
-            });
+        }
+
+        // Muat saat halaman admin pertama kali dibuka
+        loadAdminKamar();
 
         // Fungsi upload foto ke API
         function uploadFoto(idKamar) {
             const fileInput = document.getElementById(`file-${idKamar}`);
-            const statusEl = document.getElementById(`status-${idKamar}`);
+            const statusEl  = document.getElementById(`status-${idKamar}`);
+            const ketInput  = document.getElementById(`ket-${idKamar}`);
 
             if (!fileInput.files[0]) {
                 statusEl.textContent = '⚠ Pilih file terlebih dahulu.';
@@ -171,12 +196,15 @@
                 return;
             }
 
-            statusEl.textContent = 'Mengupload...';
+            statusEl.textContent = 'Mengupload foto ke slider...';
             statusEl.className = 'status-msg';
 
             const formData = new FormData();
             formData.append('id_kamar', idKamar);
             formData.append('foto', fileInput.files[0]);
+            if (ketInput && ketInput.value.trim() !== '') {
+                formData.append('keterangan', ketInput.value.trim());
+            }
 
             fetch('../api/upload_foto.php', {
                 method: 'POST',
@@ -187,6 +215,8 @@
                 if (res.status === 'success') {
                     statusEl.textContent = '✅ ' + res.message;
                     statusEl.className = 'status-msg status-ok';
+                    // Reload data agar thumbnail baru langsung muncul
+                    setTimeout(loadAdminKamar, 800);
                 } else {
                     statusEl.textContent = '❌ ' + res.message;
                     statusEl.className = 'status-msg status-err';

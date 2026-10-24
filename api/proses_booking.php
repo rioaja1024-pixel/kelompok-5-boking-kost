@@ -2,39 +2,70 @@
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config/koneksi.php';
 
-// Pastikan semua data dikirim dari form (nama, unit, durasi, total)
-if (isset($_POST['nama']) && isset($_POST['unit']) && isset($_POST['durasi']) && isset($_POST['total'])) {
-    
-    $nama   = mysqli_real_escape_string($koneksi, trim($_POST['nama']));
-    $unit   = mysqli_real_escape_string($koneksi, trim($_POST['unit']));
-    $durasi = (int)$_POST['durasi'];
-    $total  = (int)$_POST['total'];
-    $metode = isset($_POST['metode']) ? mysqli_real_escape_string($koneksi, trim($_POST['metode'])) : 'Cash';
-
-    // Cek apakah ada inputan yang kosong
-    if (strlen($nama) === 0 || strlen($unit) === 0 || $durasi <= 0) {
-        echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap! Harap isi semua form.']);
-        exit;
+// Mendukung FormData ($_POST) maupun JSON raw payload
+$input = $_POST;
+if (empty($input)) {
+    $raw = file_get_contents('php://input');
+    if (!empty($raw)) {
+        $json = json_decode($raw, true);
+        if (is_array($json)) {
+            $input = $json;
+        }
     }
+}
 
-    // 1. Simpan data ke tabel booking
-    $query_booking = "INSERT INTO booking (nama, unit, durasi, total, metode_pembayaran) VALUES ('$nama', '$unit', $durasi, $total, '$metode')";
-    $insert_booking = mysqli_query($koneksi, $query_booking);
+// Ambil field-field yang dikirimkan
+$nama   = isset($input['nama']) ? trim($input['nama']) : (isset($input['nama_pemesan']) ? trim($input['nama_pemesan']) : '');
+$unit   = isset($input['unit']) ? trim($input['unit']) : (isset($input['nama_unit']) ? trim($input['nama_unit']) : '');
+$durasi = isset($input['durasi']) ? (int)$input['durasi'] : 1;
+$total  = isset($input['total']) ? (int)$input['total'] : (isset($input['total_harga']) ? (int)$input['total_harga'] : 0);
+$metode = isset($input['metode']) ? trim($input['metode']) : (isset($input['metode_pembayaran']) ? trim($input['metode_pembayaran']) : 'Tunai / Cash');
 
-    if ($insert_booking) {
-        // 2. Kalau booking sukses, update status kamar jadi 'terisi'
-        $query_update_kamar = "UPDATE kamar SET status = 'terisi' WHERE nama_kamar = '$unit'";
-        mysqli_query($koneksi, $query_update_kamar);
+// Validasi input
+if (empty($nama) || empty($unit)) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Data tidak lengkap! Nama pemesan dan unit kamar harus diisi.'
+    ]);
+    exit;
+}
 
-        // Kirim respon sukses ke frontend
-        echo json_encode(['status' => 'success', 'message' => 'Booking berhasil! Kamar sekarang berstatus terisi.']);
-    } else {
-        // Gagal menyimpan ke database
-        echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database: ' . mysqli_error($koneksi)]);
-    }
+if ($durasi <= 0) {
+    $durasi = 1;
+}
 
+// Escape string untuk keamanan MySQL
+$namaEsc   = mysqli_real_escape_string($koneksi, $nama);
+$unitEsc   = mysqli_real_escape_string($koneksi, $unit);
+$metodeEsc = mysqli_real_escape_string($koneksi, $metode);
+
+// 1. Simpan data booking ke tabel booking dengan nama kolom yang sesuai skema database
+$query_booking = "INSERT INTO booking (nama_unit, nama_pemesan, durasi, total_harga, metode_pembayaran) 
+                  VALUES ('$unitEsc', '$namaEsc', $durasi, $total, '$metodeEsc')";
+
+$insert_booking = mysqli_query($koneksi, $query_booking);
+
+if ($insert_booking) {
+    // 2. Update status kamar menjadi 'terisi'
+    $query_update = "UPDATE kamar SET status = 'terisi' WHERE nama_kamar = '$unitEsc'";
+    mysqli_query($koneksi, $query_update);
+
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Pemesanan kamar ' . $unit . ' berhasil disimpan!',
+        'data' => [
+            'id' => mysqli_insert_id($koneksi),
+            'unit' => $unit,
+            'nama' => $nama,
+            'durasi' => $durasi,
+            'total' => $total,
+            'metode' => $metode
+        ]
+    ]);
 } else {
-    // Ada variabel yang tidak terkirim dari script.js
-    echo json_encode(['status' => 'error', 'message' => 'Error sistem: Data POST tidak lengkap.']);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Gagal menyimpan pemesanan ke database: ' . mysqli_error($koneksi)
+    ]);
 }
 ?>

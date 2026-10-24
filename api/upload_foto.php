@@ -9,6 +9,9 @@ if (!isset($_POST['id_kamar']) || !isset($_FILES['foto']) || $_FILES['foto']['er
 }
 
 $id_kamar = intval($_POST['id_kamar']);
+$keterangan = isset($_POST['keterangan']) && trim($_POST['keterangan']) !== '' 
+    ? mysqli_real_escape_string($koneksi, trim($_POST['keterangan'])) 
+    : 'Foto Kamar';
 
 // Validasi tipe file (hanya gambar)
 $allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -35,13 +38,27 @@ $target    = $upload_dir . $nama_file;
 
 // Pindahkan file ke folder uploads
 if (move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
-    // Update kolom gambar di database
+    // 1. Update kolom gambar utama di tabel kamar
     $query = "UPDATE kamar SET gambar = '$nama_file' WHERE id = $id_kamar";
-    if (mysqli_query($koneksi, $query)) {
-        echo json_encode(['status' => 'success', 'message' => 'Foto berhasil diupload!', 'file' => $nama_file]);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal update database: ' . mysqli_error($koneksi)]);
+    mysqli_query($koneksi, $query);
+
+    // 2. Simpan juga ke tabel foto_kamar agar otomatis masuk ke slider
+    $q_max = "SELECT COALESCE(MAX(urutan), 0) + 1 AS next_urutan FROM foto_kamar WHERE id_kamar = $id_kamar";
+    $res_max = mysqli_query($koneksi, $q_max);
+    $next_urutan = 1;
+    if ($res_max && $row_max = mysqli_fetch_assoc($res_max)) {
+        $next_urutan = (int)$row_max['next_urutan'];
     }
+
+    $q_insert = "INSERT INTO foto_kamar (id_kamar, nama_file, keterangan, urutan) 
+                 VALUES ($id_kamar, '$nama_file', '$keterangan', $next_urutan)";
+    mysqli_query($koneksi, $q_insert);
+
+    echo json_encode([
+        'status' => 'success', 
+        'message' => 'Foto berhasil diupload dan ditambahkan ke slider kamar!', 
+        'file' => $nama_file
+    ]);
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Gagal memindahkan file upload.']);
 }

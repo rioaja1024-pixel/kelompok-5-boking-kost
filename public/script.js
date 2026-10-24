@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initSearchToggle();
     initDurasiStepper();
     initSelectKamar();
+    initDetailSliderEvents();
 
     // 3. Ambil data terbaru dari database (jika lewat server http/localhost)
     muatDataKamar();
@@ -150,7 +151,7 @@ function initSelectKamar() {
 //  LOAD DATA KAMAR DARI SERVER
 // =====================================================
 function muatDataKamar() {
-    fetch('../api/get_kamar.php')
+    fetch('../api/get_kamar.php?_t=' + Date.now())
         .then(function (res) {
             if (!res.ok) throw new Error('HTTP error ' + res.status);
             return res.json();
@@ -202,18 +203,115 @@ function renderSelectOptions(data) {
     }
 }
 
-// Helper untuk mendapatkan URL foto kamar yang valid
+// =====================================================
+//  DATA FOTO MULTI-SLIDE PER KAMAR (FALLBACK & DEFAULT)
+// =====================================================
+const defaultFotoKamarMap = {
+    1: [
+        { file: 'kamar_1_1792312623.jpg', keterangan: 'Kamar Tidur Utama' },
+        { file: 'kamar_1_1792231112.png', keterangan: 'Sudut Meja & Lemari' },
+        { file: 'Kos Dekat Telkom University Ph_WA 0811 222 1614 Nyaman dan Murah.jpg', keterangan: 'Fasilitas & Lingkungan Kost' }
+    ],
+    2: [
+        { file: 'kamar_2_1792312961.jpg', keterangan: 'Kamar Tidur & Kasur' },
+        { file: 'kamar_2_1792231111.png', keterangan: 'Sudut Lemari & Meja' },
+        { file: 'Kos Dekat Telkom University Ph_WA 0811 222 1614 Nyaman dan Murah.jpg', keterangan: 'Fasilitas & Lingkungan Kost' }
+    ],
+    3: [
+        { file: 'kamar_3_1792312960.jpg', keterangan: 'Kamar Tidur Nyaman' },
+        { file: 'kamar_3_1792231110.png', keterangan: 'Meja Belajar & Rak' },
+        { file: 'Kos Dekat Telkom University Ph_WA 0811 222 1614 Nyaman dan Murah.jpg', keterangan: 'Fasilitas & Lingkungan Kost' }
+    ],
+    4: [
+        { file: 'kamar_4_1792312958.jpg', keterangan: 'Tempat Tidur & Ventilasi' },
+        { file: 'kamar4.jpg', keterangan: 'Interior & Meja Kerja' },
+        { file: 'Kos Dekat Telkom University Ph_WA 0811 222 1614 Nyaman dan Murah.jpg', keterangan: 'Fasilitas & Lingkungan Kost' }
+    ],
+    5: [
+        { file: 'kamar_5_1792312957.jpg', keterangan: 'Kamar Tidur Luas' },
+        { file: 'kamar.jpg', keterangan: 'Sudut Kamar & Kasur' },
+        { file: 'Kos Dekat Telkom University Ph_WA 0811 222 1614 Nyaman dan Murah.jpg', keterangan: 'Fasilitas & Lingkungan Kost' }
+    ],
+    6: [
+        { file: 'kamar_6_1792312955.jpg', keterangan: 'Kamar Tidur Bersih' },
+        { file: 'kamar6.jpg', keterangan: 'Area Meja & Lemari' },
+        { file: 'Kos Dekat Telkom University Ph_WA 0811 222 1614 Nyaman dan Murah.jpg', keterangan: 'Fasilitas & Lingkungan Kost' }
+    ]
+};
+
+// Helper untuk mendapatkan URL foto cover utama kamar
 function getFotoKamar(item) {
+    if (Array.isArray(item.fotos) && item.fotos.length > 0 && item.fotos[0].file) {
+        return 'uploads/' + item.fotos[0].file;
+    }
     let foto = (item.gambar && item.gambar.trim() !== '') ? item.gambar.trim() : '';
     if (!foto) {
-        if (item.nama_kamar.includes('4') || item.id == 4) foto = 'kamar4.jpg';
-        else if (item.nama_kamar.includes('5') || item.id == 5) foto = 'kamar.jpg';
-        else if (item.nama_kamar.includes('6') || item.id == 6) foto = 'kamar6.jpg';
-        else if (item.nama_kamar.includes('1') || item.id == 1) foto = 'kamar_1_1792231112.png';
-        else if (item.nama_kamar.includes('2') || item.id == 2) foto = 'kamar_2_1792231111.png';
-        else if (item.nama_kamar.includes('3') || item.id == 3) foto = 'kamar_3_1792231110.png';
+        let nomor = parseInt(item.id) || 0;
+        if (!nomor && item.nama_kamar) {
+            let m = item.nama_kamar.match(/\d+/);
+            if (m) nomor = parseInt(m[0]);
+        }
+        if (nomor && defaultFotoKamarMap[nomor] && defaultFotoKamarMap[nomor].length > 0) {
+            foto = defaultFotoKamarMap[nomor][0].file;
+        }
     }
     return foto ? ('uploads/' + foto) : 'https://placehold.co/300x200/e8e7ff/4f46e5?text=' + encodeURIComponent(item.nama_kamar);
+}
+
+// Helper untuk mendapatkan array seluruh foto kamar (untuk slider)
+function getDaftarFotoKamar(item) {
+    let list = [];
+
+    // 1. Jika ada fotos dari response API database
+    if (Array.isArray(item.fotos) && item.fotos.length > 0) {
+        item.fotos.forEach(function (f) {
+            if (f.file && f.file.trim() !== '') {
+                list.push({
+                    src: 'uploads/' + f.file.trim(),
+                    keterangan: f.keterangan || 'Foto Kamar'
+                });
+            }
+        });
+        if (list.length > 0) return list;
+    }
+
+    // 2. Cek default mapping foto berdasarkan nomor kamar
+    let nomor = parseInt(item.id) || 0;
+    if (!nomor && item.nama_kamar) {
+        let match = item.nama_kamar.match(/\d+/);
+        if (match) nomor = parseInt(match[0]);
+    }
+
+    if (nomor && defaultFotoKamarMap[nomor]) {
+        defaultFotoKamarMap[nomor].forEach(function (f) {
+            list.push({
+                src: 'uploads/' + f.file,
+                keterangan: f.keterangan
+            });
+        });
+    }
+
+    // 3. Pastikan file gambar utama dari database ikut serta
+    if (item.gambar && item.gambar.trim() !== '') {
+        const utamaSrc = 'uploads/' + item.gambar.trim();
+        const exists = list.some(function (f) { return f.src === utamaSrc; });
+        if (!exists) {
+            list.unshift({
+                src: utamaSrc,
+                keterangan: 'Foto Utama'
+            });
+        }
+    }
+
+    // 4. Fallback jika list masih kosong
+    if (list.length === 0) {
+        list.push({
+            src: 'https://placehold.co/600x400/e8e7ff/4f46e5?text=' + encodeURIComponent(item.nama_kamar),
+            keterangan: 'Tampak Ruangan'
+        });
+    }
+
+    return list;
 }
 
 // Render status grid (kotak indikator ketersediaan)
@@ -228,7 +326,6 @@ function renderStatusGrid(data) {
 
     data.forEach(function (item) {
         const isTerisi = item.status === 'terisi';
-        const fotoSrc  = getFotoKamar(item);
         const chip = document.createElement('div');
         chip.className = 'status-chip ' + (isTerisi ? 'terisi' : 'kosong');
         chip.innerHTML =
@@ -236,7 +333,7 @@ function renderStatusGrid(data) {
             '<span class="chip-status">' + (isTerisi ? '🔴 Terisi' : '🟢 Kosong') + '</span>';
         
         chip.addEventListener('click', function () {
-            bukaDetail(item, fotoSrc);
+            bukaDetail(item);
         });
 
         grid.appendChild(chip);
@@ -263,9 +360,6 @@ function renderKatalog(data) {
             '<div class="card-img-wrap">' +
                 '<img src="' + fotoSrc + '" alt="' + item.nama_kamar + '" ' +
                     'onerror="this.src=\'https://placehold.co/300x200/e8e7ff/4f46e5?text=No+Photo\'">' +
-                '<span class="card-status-badge ' + (isTerisi ? 'terisi' : 'kosong') + '">' +
-                    (isTerisi ? 'Terisi' : 'Tersedia') +
-                '</span>' +
             '</div>' +
             '<div class="card-body">' +
                 '<div class="card-name">' + item.nama_kamar + '</div>' +
@@ -276,12 +370,17 @@ function renderKatalog(data) {
                     ' Kost Nyaman' +
                 '</div>' +
                 '<div class="card-stars">★★★★★</div>' +
-                '<div class="card-price">' + hargaFmt + '<span>/bln</span></div>' +
+                '<div class="card-price-row">' +
+                    '<div class="card-price">' + hargaFmt + '<span>/bln</span></div>' +
+                    '<span class="card-status-badge ' + (isTerisi ? 'terisi' : 'kosong') + '">' +
+                        (isTerisi ? 'Terisi' : 'Tersedia') +
+                    '</span>' +
+                '</div>' +
             '</div>';
 
-        // Klik kartu -> buka popup detail kamar
+        // Klik kartu -> buka popup detail kamar dengan foto slider
         card.addEventListener('click', function () {
-            bukaDetail(item, fotoSrc);
+            bukaDetail(item);
         });
 
         container.appendChild(card);
@@ -289,22 +388,212 @@ function renderKatalog(data) {
 }
 
 // =====================================================
-//  MODAL DETAIL KAMAR
+//  SLIDER FOTO KAMAR DI MODAL DETAIL
 // =====================================================
-function bukaDetail(item, fotoSrc) {
+let currentSlideIndex = 0;
+let activeSlideFotos  = [];
+
+function setupDetailSlider(fotos, namaKamar) {
+    activeSlideFotos = Array.isArray(fotos) && fotos.length > 0 ? fotos : [
+        { src: 'https://placehold.co/600x400/e8e7ff/4f46e5?text=Foto+Kamar', keterangan: 'Kamar Kost' }
+    ];
+    currentSlideIndex = 0;
+
+    const track = document.getElementById('detailSliderTrack');
+    const dotsContainer = document.getElementById('sliderDots');
+    const btnPrev = document.getElementById('sliderPrev');
+    const btnNext = document.getElementById('sliderNext');
+
+    if (!track) return;
+    track.innerHTML = '';
+
+    if (dotsContainer) dotsContainer.innerHTML = '';
+
+    // Buat element untuk masing-masing slide
+    activeSlideFotos.forEach(function (foto, idx) {
+        const slide = document.createElement('div');
+        slide.className = 'detail-slide';
+        slide.innerHTML =
+            '<img src="' + foto.src + '" alt="' + namaKamar + ' - Foto ' + (idx + 1) + '" class="detail-slide-img" ' +
+                'onerror="this.src=\'https://placehold.co/600x400/e8e7ff/4f46e5?text=No+Photo\'">' +
+            '<div class="detail-slide-caption">' +
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+                '<span>' + (foto.keterangan || ('Foto ' + (idx + 1))) + '</span>' +
+            '</div>';
+        track.appendChild(slide);
+
+        // Buat dot navigasi
+        if (dotsContainer) {
+            const dot = document.createElement('span');
+            dot.className = 'slider-dot' + (idx === 0 ? ' active' : '');
+            dot.setAttribute('title', 'Lihat foto ' + (idx + 1));
+            dot.addEventListener('click', function (e) {
+                e.stopPropagation();
+                pindahSlide(idx);
+            });
+            dotsContainer.appendChild(dot);
+        }
+    });
+
+    // Jika hanya 1 foto, sembunyikan panah & dots
+    const isSingle = activeSlideFotos.length <= 1;
+    if (btnPrev) btnPrev.style.display = isSingle ? 'none' : 'flex';
+    if (btnNext) btnNext.style.display = isSingle ? 'none' : 'flex';
+    if (dotsContainer) dotsContainer.style.display = isSingle ? 'none' : 'flex';
+
+    pindahSlide(0);
+}
+
+function pindahSlide(index) {
+    if (!activeSlideFotos || activeSlideFotos.length === 0) return;
+
+    const total = activeSlideFotos.length;
+    // Looping navigasi (dari akhir kembali ke awal, atau sebaliknya)
+    if (index >= total) {
+        currentSlideIndex = 0;
+    } else if (index < 0) {
+        currentSlideIndex = total - 1;
+    } else {
+        currentSlideIndex = index;
+    }
+
+    const track = document.getElementById('detailSliderTrack');
+    if (track) {
+        track.style.transform = 'translateX(-' + (currentSlideIndex * 100) + '%)';
+    }
+
+    // Update Badge Counter
+    const badgeText = document.getElementById('sliderBadgeText');
+    if (badgeText) {
+        const ket = activeSlideFotos[currentSlideIndex].keterangan;
+        badgeText.textContent = (currentSlideIndex + 1) + ' / ' + total + (ket ? (' • ' + ket) : '');
+    }
+
+    // Update Active Dot
+    const dots = document.querySelectorAll('.slider-dot');
+    dots.forEach(function (d, idx) {
+        if (idx === currentSlideIndex) {
+            d.classList.add('active');
+        } else {
+            d.classList.remove('active');
+        }
+    });
+}
+
+function geserSlide(arah) {
+    pindahSlide(currentSlideIndex + arah);
+}
+
+// Inisialisasi event geser touch (swipe smartphone), mouse drag, tombol panah, dan keyboard
+function initDetailSliderEvents() {
+    const btnPrev = document.getElementById('sliderPrev');
+    const btnNext = document.getElementById('sliderNext');
+
+    if (btnPrev) {
+        btnPrev.addEventListener('click', function (e) {
+            e.stopPropagation();
+            geserSlide(-1);
+        });
+    }
+
+    if (btnNext) {
+        btnNext.addEventListener('click', function (e) {
+            e.stopPropagation();
+            geserSlide(1);
+        });
+    }
+
+    const container = document.getElementById('detailSliderContainer');
+    if (!container) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX   = 0;
+    let isSwiping   = false;
+
+    // Touch events untuk smartphone
+    container.addEventListener('touchstart', function (e) {
+        if (!e.touches || e.touches.length === 0) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchEndX   = touchStartX;
+        isSwiping   = true;
+    }, { passive: true });
+
+    container.addEventListener('touchmove', function (e) {
+        if (!isSwiping || !e.touches || e.touches.length === 0) return;
+        touchEndX = e.touches[0].clientX;
+    }, { passive: true });
+
+    container.addEventListener('touchend', function () {
+        if (!isSwiping) return;
+        isSwiping = false;
+        const diffX = touchEndX - touchStartX;
+        if (Math.abs(diffX) > 40) {
+            if (diffX < 0) {
+                geserSlide(1);  // Swipe ke kiri -> foto berikutnya
+            } else {
+                geserSlide(-1); // Swipe ke kanan -> foto sebelumnya
+            }
+        }
+    });
+
+    // Mouse drag events untuk desktop
+    let isMouseDown = false;
+    let mouseStartX = 0;
+
+    container.addEventListener('mousedown', function (e) {
+        isMouseDown = true;
+        mouseStartX = e.clientX;
+    });
+
+    container.addEventListener('mouseup', function (e) {
+        if (!isMouseDown) return;
+        isMouseDown = false;
+        const diffX = e.clientX - mouseStartX;
+        if (Math.abs(diffX) > 45) {
+            if (diffX < 0) {
+                geserSlide(1);
+            } else {
+                geserSlide(-1);
+            }
+        }
+    });
+
+    container.addEventListener('mouseleave', function () {
+        isMouseDown = false;
+    });
+
+    // Navigasi keyboard panah kiri/kanan saat modal detail terbuka
+    window.addEventListener('keydown', function (e) {
+        const modal = document.getElementById('modalDetail');
+        if (modal && modal.style.display !== 'none') {
+            if (e.key === 'ArrowLeft') {
+                geserSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                geserSlide(1);
+            } else if (e.key === 'Escape') {
+                tutupDetail();
+            }
+        }
+    });
+}
+
+// =====================================================
+//  BUKA & TUTUP MODAL DETAIL KAMAR
+// =====================================================
+function bukaDetail(item) {
     unitDipilihData = item;
 
     const isTerisi = item.status === 'terisi';
     const hargaFmt = 'Rp ' + parseInt(item.harga).toLocaleString('id-ID') + '/bulan';
 
-    const detailFoto = document.getElementById('detailFoto');
-    const detailNama = document.getElementById('detailNama');
+    const detailNama  = document.getElementById('detailNama');
     const detailHarga = document.getElementById('detailHarga');
     const detailBadge = document.getElementById('detailBadge');
-    const btnBook = document.getElementById('btnBookDetail');
+    const btnBook     = document.getElementById('btnBookDetail');
 
-    if (detailFoto) detailFoto.src = fotoSrc;
-    if (detailNama) detailNama.textContent  = item.nama_kamar;
+    if (detailNama)  detailNama.textContent  = item.nama_kamar;
     if (detailHarga) detailHarga.textContent = hargaFmt;
 
     if (detailBadge) {
@@ -325,6 +614,10 @@ function bukaDetail(item, fotoSrc) {
             btnBook.style.cursor = 'pointer';
         }
     }
+
+    // Siapkan slider dengan semua foto yang dimiliki kamar
+    const daftarFoto = getDaftarFotoKamar(item);
+    setupDetailSlider(daftarFoto, item.nama_kamar);
 
     const modalDetail = document.getElementById('modalDetail');
     if (modalDetail) modalDetail.style.display = 'flex';
@@ -469,7 +762,12 @@ function pilihMetode(metodeName) {
     })
     .then(function (response) { return response.json(); })
     .then(function (res) {
-        selesaikanBooking(bookedData, metodeName);
+        if (res.status === 'success') {
+            selesaikanBooking(bookedData, metodeName);
+        } else {
+            alert('Perhatian: ' + (res.message || 'Gagal menyimpan booking ke server.'));
+            selesaikanBooking(bookedData, metodeName);
+        }
     })
     .catch(function (err) {
         console.warn('Gagal terhubung ke API backend, melanjutkan proses via konfirmasi WhatsApp:', err);
@@ -491,7 +789,16 @@ function selesaikanBooking(bookedData, metodeName) {
     unitDipilihData = null;
     hitungTotalHarga();
 
-    // Perbarui data kamar dari database
+    // Update status kamar langsung di memori tampilan
+    const kmr = daftarKamarData.find(function (k) { return k.nama_kamar === bookedData.unit; });
+    if (kmr) {
+        kmr.status = 'terisi';
+    }
+    renderSelectOptions(daftarKamarData);
+    renderStatusGrid(daftarKamarData);
+    renderKatalog(daftarKamarData);
+
+    // Sinkronkan kembali dengan data fresh dari database
     muatDataKamar();
 
     // Tampilkan popup sukses booking dengan metode pembayaran
