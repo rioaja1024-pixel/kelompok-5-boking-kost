@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Admin Dashboard — Pengelola Kost Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=6.0">
+    <style>
+        :root {
+            --admin-primary: #4f46e5;
+            --admin-primary-dark: #4338ca;
+            --admin-bg: #f8fafc;
+            --admin-card: #ffffff;
+            --admin-border: #e2e8f0;
+            --admin-text: #0f172a;
+            --admin-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--admin-bg);
+            color: var(--admin-text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .admin-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px 60px;
+        }
+
+        /* Top Nav Admin */
+        .admin-nav {
+            background: #ffffff;
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            margin-bottom: 24px;
+        }
+        .admin-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .admin-nav-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--admin-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .admin-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        .admin-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-link-web {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--admin-primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: #eef2ff;
+            transition: all 0.2s;
+        }
+        .btn-link-web:hover {
+            background: #e0e7ff;
+        }
+        .btn-lock {
+            background: #f1f5f9;
+            border: 1px solid var(--admin-border);
+            color: var(--admin-muted);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-lock:hover {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--admin-border);
+            border-radius: 16px;
+            padding: 16px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .stat-val {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--admin-text);
+            line-height: 1.1;
+        }
+        .stat-lbl {
+            font-size: 12px;
+            color: var(--admin-muted);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+
+        /* Tabs Menu */
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .admin-tab-btn {
+            flex: 1;
+            min-width: 130px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .admin-tab-btn.active {
+            background: #ffffff;
+            color: var(--admin-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* Section Cards */
+        .admin-card {
+            background: #ffffff;
+            border: 1px solid var(--admin-border);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+        }
+        .card-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .card-header-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--admin-text);
+        }
+
+        /* Kamar Management Grid */
+        .kamar-admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .kamar-admin-item {
+            border: 1px solid var(--admin-border);
+            border-radius: 14px;
+            padding: 14px;
+            background: #fdfdfd;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .kamar-admin-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .kamar-admin-top {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .kamar-admin-thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid #e2e8f0;
+            background: #e2e8f0;
+            flex-shrink: 0;
+        }
+        .kamar-admin-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--admin-text);
+            margin-bottom: 2px;
+        }
+        .kamar-admin-price {
+            font-size: 13px;
+            font-weight: 700;
+            color: #059669;
+        }
+        .kamar-admin-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .btn-toggle-status {
+            flex: 1;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-toggle-status.kosong {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .btn-toggle-status.kosong:hover {
+            background: #a7f3d0;
+        }
+        .btn-toggle-status.terisi {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .btn-toggle-status.terisi:hover {
+            background: #fecaca;
+        }
+
+        .btn-edit-harga {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-edit-harga:hover {
+            background: #e2e8f0;
+        }
+
+        /* Booking Table */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--admin-border);
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        .admin-table th {
+            background: #f8fafc;
+            padding: 12px 14px;
+            font-weight: 700;
+            color: #475569;
+            border-bottom: 1px solid var(--admin-border);
+            white-space: nowrap;
+        }
+        .admin-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--admin-text);
+            vertical-align: middle;
+        }
+        .admin-table tr:hover td {
+            background: #f8fafc;
+        }
+        .btn-delete-booking {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-delete-booking:hover {
+            background: #fecaca;
+        }
+
+        /* Photo Upload Section */
+        .upload-kamar-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            margin-bottom: 14px;
+            background: #ffffff;
+            flex-wrap: wrap;
+        }
+        .upload-kamar-info {
+            width: 160px;
+            flex-shrink: 0;
+        }
+        .upload-kamar-form {
+            flex: 1;
+            min-width: 260px;
+        }
+        .gallery-thumbs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .gallery-thumb-item {
+            position: relative;
+            width: 80px;
+            text-align: center;
+        }
+        .gallery-thumb-item img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-del-thumb {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* PIN Login Modal */
+        .pin-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .pin-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: 24px;
+            padding: 30px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        .pin-icon {
+            width: 56px;
+            height: 56px;
+            background: #e0e7ff;
+            color: var(--admin-primary);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 14px;
+        }
+        .pin-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 16px;
+            font-size: 18px;
+            letter-spacing: 6px;
+            text-align: center;
+            font-weight: 800;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin: 16px 0 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .pin-input:focus {
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+        }
+        .btn-login-pin {
+            width: 100%;
+            background: var(--admin-primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-login-pin:hover {
+            background: var(--admin-primary-dark);
+        }
+
+        /* Toast */
+        .toast-msg {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== MODAL LOGIN PIN ADMIN ===== -->
+    <div id="modalPin" class="pin-modal-overlay">
+        <div class="pin-card">
+            <div class="pin-icon">🔒</div>
+            <h2 style="margin:0 0 6px; font-size:18px; font-weight:800;">Panel Pengelola Kost</h2>
+            <p style="margin:0; font-size:13px; color:#64748b;">Masukkan PIN Admin untuk mengelola sistem:</p>
+            
+            <form id="formPin" onsubmit="verifikasiPin(event)">
+                <input type="password" id="inputPin" class="pin-input" placeholder="••••" maxlength="8" autofocus required>
+                <button type="submit" class="btn-login-pin">Masuk ke Panel Admin</button>
+            </form>
+            <div id="pinErr" style="color:#ef4444; font-size:12px; font-weight:600; margin-top:10px; display:none;">
+                PIN salah. Silakan coba lagi.
+            </div>
+            <p style="margin-top:16px; font-size:12px; color:#94a3b8;">
+                <a href="index.html" style="color:#64748b; text-decoration:none;">← Kembali ke Halaman Kost</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD ADMIN WRAPPER ===== -->
+    <div class="admin-wrapper" id="adminContent" style="display:none;">
+
+        <!-- TOP BAR -->
+        <header class="admin-nav">
+            <div class="admin-nav-left">
+                <span class="admin-nav-title">
+                    ⚙️ Pengelola Kost
+                    <span class="admin-badge">Admin Panel</span>
+                </span>
+            </div>
+            <div class="admin-nav-right">
+                <a href="index.html" class="btn-link-web" title="Lihat Tampilan Kost Pengunjung">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Buka Website
+                </a>
+                <button type="button" class="btn-lock" onclick="logoutAdmin()" title="Kunci Admin">
+                    🔒 Kunci
+                </button>
+            </div>
+        </header>
+
+        <!-- STATISTIK RINGKASAN -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e0e7ff; color:#4338ca;">🏠</div>
+                <div>
+                    <div class="stat-val" id="statTotalUnit">0</div>
+                    <div class="stat-lbl">Total Unit Kamar</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#d1fae5; color:#065f46;">🟢</div>
+                <div>
+                    <div class="stat-val" id="statTersedia" style="color:#059669;">0</div>
+                    <div class="stat-lbl">Unit Tersedia</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fee2e2; color:#991b1b;">🔴</div>
+                <div>
+                    <div class="stat-val" id="statTerisi" style="color:#dc2626;">0</div>
+                    <div class="stat-lbl">Unit Terisi</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef3c7; color:#92400e;">📋</div>
+                <div>
+                    <div class="stat-val" id="statBooking">0</div>
+                    <div class="stat-lbl">Pemesanan Masuk</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS NAVIGASI -->
+        <div class="admin-tabs">
+            <button type="button" class="admin-tab-btn active" data-tab="tabKamar" onclick="pindahTab('tabKamar')">
+                🛏️ Status & Harga Kamar
+            </button>
+            <button type="button" class="admin-tab-btn" data-tab="tabBooking" onclick="pindahTab('tabBooking')">
+                📋 Data Pemesanan Kost
+            </button>
+            <button type="button" class="admin-tab-btn" data-tab="tabFoto" onclick="pindahTab('tabFoto')">
+                🖼️ Kelola Foto Slider
+            </button>
+        </div>
+
+        <!-- TAB 1: KELOLA STATUS & HARGA KAMAR -->
+        <div id="tabKamar" class="tab-pane">
+            <div class="admin-card">
+                <div class="card-header-row">
+                    <div>
+                        <div class="card-header-title">Daftar Unit Kamar</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                            Klik status untuk mengubah ketersediaan kamar secara instan (Tersedia / Terisi).
+                        </div>
+                    </div>
+                    <button type="button" onclick="resetSemuaKamar()" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#334155; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                        🔄 Reset Semua Menjadi Tersedia
+                    </button>
+                </div>
+
+                <div id="kamarGridAdmin" class="kamar-admin-grid">
+                    <p style="color:#64748b;">Memuat data kamar...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: DATA PEMESANAN / BOOKING -->
+        <div id="tabBooking" class="tab-pane" style="display:none;">
+            <div class="admin-card">
+                <div class="card-header-row">
+                    <div>
+                        <div class="card-header-title">Riwayat Pemesanan Kost Masuk</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                            Data booking yang telah dikirimkan oleh pemesan melalui website.
+                        </div>
+                    </div>
+                    <button type="button" onclick="muatDataBooking()" style="background:#eef2ff; border:none; color:#4f46e5; padding:8px 14px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>#ID</th>
+                                <th>Tanggal & Waktu</th>
+                                <th>Nama Pemesan</th>
+                                <th>Unit Kamar</th>
+                                <th>Durasi</th>
+                                <th>Total Biaya</th>
+                                <th>Metode Pembayaran</th>
+                                <th style="text-align:center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyBooking">
+                            <tr>
+                                <td colspan="8" style="text-align:center; color:#64748b; padding:20px;">Memuat data booking...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: KELOLA FOTO SLIDER -->
+        <div id="tabFoto" class="tab-pane" style="display:none;">
+            <div class="admin-card">
+                <div class="card-header-row">
+                    <div>
+                        <div class="card-header-title">Kelola Foto Slider Tiap Kamar</div>
+                        <div style="font-size:12px; color:#64748b; margin-top:2px;">
+                            Upload foto sudut kamar (kasur, meja belajar, kamar mandi, dll.) untuk slider modal detail.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="listFotoKamarAdmin">
+                    <p style="color:#64748b;">Memuat data foto kamar...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toastMsg" class="toast-msg"></div>
+
+    <script>
+        const ADMIN_PIN_KEY = 'kost_admin_pin_token';
+        let currentAdminPin = sessionStorage.getItem(ADMIN_PIN_KEY) || '';
+
+        // Inisialisasi halaman
+        document.addEventListener('DOMContentLoaded', function () {
+            if (currentAdminPin) {
+                // Verifikasi PIN yang tersimpan
+                cekPinOtomatis(currentAdminPin);
+            } else {
+                bukaModalPin();
+            }
+        });
+
+        function bukaModalPin() {
+            document.getElementById('modalPin').style.display = 'flex';
+            document.getElementById('adminContent').style.display = 'none';
+            document.getElementById('inputPin').focus();
+        }
+
+        function verifikasiPin(e) {
+            e.preventDefault();
+            const pinVal = document.getElementById('inputPin').value.trim();
+            if (!pinVal) return;
+
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pinVal, action: 'verify' })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    currentAdminPin = pinVal;
+                    sessionStorage.setItem(ADMIN_PIN_KEY, pinVal);
+                    document.getElementById('modalPin').style.display = 'none';
+                    document.getElementById('adminContent').style.display = 'block';
+                    document.getElementById('pinErr').style.display = 'none';
+                    muatDashboardAdmin();
+                } else {
+                    document.getElementById('pinErr').style.display = 'block';
+                    document.getElementById('inputPin').select();
+                }
+            })
+            .catch(() => {
+                document.getElementById('pinErr').style.display = 'block';
+            });
+        }
+
+        function cekPinOtomatis(pin) {
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pin, action: 'verify' })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    document.getElementById('modalPin').style.display = 'none';
+                    document.getElementById('adminContent').style.display = 'block';
+                    muatDashboardAdmin();
+                } else {
+                    sessionStorage.removeItem(ADMIN_PIN_KEY);
+                    bukaModalPin();
+                }
+            })
+            .catch(() => {
+                sessionStorage.removeItem(ADMIN_PIN_KEY);
+                bukaModalPin();
+            });
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem(ADMIN_PIN_KEY);
+            currentAdminPin = '';
+            bukaModalPin();
+        }
+
+        function showToast(pesan) {
+            const toast = document.getElementById('toastMsg');
+            toast.textContent = pesan;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function pindahTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelector(`.admin-tab-btn[data-tab="${tabId}"]`).classList.add('active');
+
+            if (tabId === 'tabBooking') {
+                muatDataBooking();
+            }
+        }
+
+        // =====================================================
+        //  DATA DASHBOARD & STATISTIK
+        // =====================================================
+        function muatDashboardAdmin() {
+            muatStatistik();
+            muatDataKamar();
+        }
+
+        function muatStatistik() {
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: currentAdminPin, action: 'stats' })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    const d = res.data;
+                    document.getElementById('statTotalUnit').textContent = d.total_unit || 0;
+                    document.getElementById('statTersedia').textContent  = d.unit_kosong || 0;
+                    document.getElementById('statTerisi').textContent    = d.unit_terisi || 0;
+                    document.getElementById('statBooking').textContent   = d.total_booking || 0;
+                }
+            });
+        }
+
+        // =====================================================
+        //  TAB 1: KELOLA KAMAR
+        // =====================================================
+        let globalKamarList = [];
+
+        function muatDataKamar() {
+            fetch('../api/get_kamar.php?_t=' + Date.now())
+                .then(r => r.json())
+                .then(data => {
+                    globalKamarList = data;
+                    renderKamarAdmin(data);
+                    renderFotoAdmin(data);
+                    muatStatistik();
+                });
+        }
+
+        function renderKamarAdmin(data) {
+            const container = document.getElementById('kamarGridAdmin');
+            if (!container) return;
+            container.innerHTML = '';
+
+            data.forEach(item => {
+                const isTerisi = item.status === 'terisi';
+                const fotoSrc = item.gambar ? `uploads/${item.gambar}` : 'https://placehold.co/120x85/e8e7ff/4f46e5?text=No+Photo';
+                const hargaFmt = 'Rp ' + parseInt(item.harga).toLocaleString('id-ID');
+
+                const card = document.createElement('div');
+                card.className = 'kamar-admin-item';
+                card.innerHTML = `
+                    <div class="kamar-admin-top">
+                        <img src="${fotoSrc}" alt="${item.nama_kamar}" class="kamar-admin-thumb" onerror="this.src='https://placehold.co/120x85/e8e7ff/4f46e5?text=No+Photo'">
+                        <div style="flex:1;">
+                            <div class="kamar-admin-name">${item.nama_kamar}</div>
+                            <div class="kamar-admin-price">${hargaFmt} <span style="font-size:11px; color:#64748b; font-weight:400;">/bln</span></div>
+                            <div style="font-size:11px; margin-top:2px; font-weight:600; color:${isTerisi ? '#dc2626' : '#059669'};">
+                                ${isTerisi ? '● Terisi' : '● Tersedia'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kamar-admin-actions">
+                        <button type="button" class="btn-toggle-status ${isTerisi ? 'terisi' : 'kosong'}" onclick="toggleStatusKamar(${item.id})">
+                            ${isTerisi ? 'Ubah ke Tersedia 🟢' : 'Ubah ke Terisi 🔴'}
+                        </button>
+                        <button type="button" class="btn-edit-harga" onclick="editHargaKamar(${item.id}, ${item.harga}, '${item.nama_kamar}')">
+                            Ubah Harga
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleStatusKamar(idKamar) {
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: currentAdminPin,
+                    action: 'toggle_status',
+                    id_kamar: idKamar
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    muatDataKamar();
+                } else {
+                    alert('Gagal: ' + res.message);
+                }
+            });
+        }
+
+        function editHargaKamar(idKamar, hargaLama, namaKamar) {
+            const input = prompt(`Masukkan tarif baru per bulan untuk ${namaKamar}:`, hargaLama);
+            if (input === null) return;
+            const hargaBaru = parseInt(input.replace(/[^0-9]/g, ''));
+            if (isNaN(hargaBaru) || hargaBaru <= 0) {
+                alert('Harga tidak valid!');
+                return;
+            }
+
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: currentAdminPin,
+                    action: 'update_harga',
+                    id_kamar: idKamar,
+                    harga: hargaBaru
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    muatDataKamar();
+                } else {
+                    alert('Gagal: ' + res.message);
+                }
+            });
+        }
+
+        function resetSemuaKamar() {
+            if (!confirm('Apakah kamu yakin ingin mereset SEMUA kamar menjadi status KOSONG (Tersedia)?')) return;
+
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: currentAdminPin,
+                    action: 'reset_all_rooms'
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    muatDataKamar();
+                }
+            });
+        }
+
+        // =====================================================
+        //  TAB 2: DATA BOOKING
+        // =====================================================
+        function muatDataBooking() {
+            fetch('../api/get_booking.php?_t=' + Date.now())
+                .then(r => r.json())
+                .then(res => {
+                    const tbody = document.getElementById('tbodyBooking');
+                    tbody.innerHTML = '';
+
+                    const list = res.data || [];
+                    if (list.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b; padding:24px;">Belum ada riwayat pemesanan masuk.</td></tr>';
+                        return;
+                    }
+
+                    list.forEach(b => {
+                        const tr = document.createElement('tr');
+                        const totalFmt = 'Rp ' + parseInt(b.total_harga || 0).toLocaleString('id-ID');
+                        tr.innerHTML = `
+                            <td style="font-weight:700;">#${b.id}</td>
+                            <td style="color:#64748b; font-size:12px;">${b.created_at || '-'}</td>
+                            <td style="font-weight:700; color:#1e293b;">${b.nama_pemesan}</td>
+                            <td><span style="background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">${b.nama_unit}</span></td>
+                            <td>${b.durasi} Bulan</td>
+                            <td style="font-weight:700; color:#059669;">${totalFmt}</td>
+                            <td>${b.metode_pembayaran || 'Tunai'}</td>
+                            <td style="text-align:center;">
+                                <button type="button" class="btn-delete-booking" onclick="hapusBooking(${b.id}, '${b.nama_unit}')">
+                                    Hapus
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        function hapusBooking(idBooking, namaUnit) {
+            if (!confirm(`Hapus data booking #${idBooking} (${namaUnit})? Unit kamar otomatis akan dikembalikan menjadi KOSONG.`)) return;
+
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: currentAdminPin,
+                    action: 'delete_booking',
+                    id_booking: idBooking,
+                    kembalikan_kamar: true
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    muatDataBooking();
+                    muatDashboardAdmin();
+                } else {
+                    alert('Gagal: ' + res.message);
+                }
+            });
+        }
+
+        // =====================================================
+        //  TAB 3: KELOLA FOTO SLIDER
+        // =====================================================
+        function renderFotoAdmin(data) {
+            const container = document.getElementById('listFotoKamarAdmin');
+            if (!container) return;
+            container.innerHTML = '';
+
+            data.forEach(item => {
+                let thumbsHtml = '';
+                if (Array.isArray(item.fotos) && item.fotos.length > 0) {
+                    item.fotos.forEach(f => {
+                        const canDelete = f.id > 0;
+                        thumbsHtml += `
+                            <div class="gallery-thumb-item">
+                                <img src="uploads/${f.file}" alt="${f.keterangan || 'Foto'}" onerror="this.src='https://placehold.co/80x60/e2e8f0/64748b?text=Error'">
+                                <div style="font-size:10px; color:#64748b; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${f.keterangan}">${f.keterangan || 'Foto'}</div>
+                                ${canDelete ? `<button type="button" class="btn-del-thumb" onclick="hapusFotoSlider(${f.id})" title="Hapus foto ini">×</button>` : ''}
+                            </div>
+                        `;
+                    });
+                } else {
+                    thumbsHtml = '<span style="font-size:12px; color:#94a3b8;">Belum ada foto slider tambahan.</span>';
+                }
+
+                const row = document.createElement('div');
+                row.className = 'upload-kamar-row';
+                row.innerHTML = `
+                    <div class="upload-kamar-info">
+                        <h4 style="margin:0 0 4px; font-size:15px; font-weight:700;">${item.nama_kamar}</h4>
+                        <div style="font-size:12px; color:#059669; font-weight:600;">Rp ${parseInt(item.harga).toLocaleString('id-ID')}/bln</div>
+                        <div style="font-size:11px; color:#64748b; margin-top:6px;">Slider saat ini:</div>
+                        <div class="gallery-thumbs">${thumbsHtml}</div>
+                    </div>
+                    <div class="upload-kamar-form">
+                        <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px; color:#334155;">Tambah Foto Baru ke Slider:</label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <input type="text" id="ketFoto_${item.id}" placeholder="Keterangan (misal: Kamar Mandi Dalam)" style="padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:12px; flex:1; min-width:160px;">
+                            <input type="file" id="fileFoto_${item.id}" accept="image/*" style="font-size:12px; flex:1; min-width:180px;">
+                            <button type="button" onclick="uploadFotoKamar(${item.id})" style="background:#4f46e5; color:white; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;">
+                                Upload Foto
+                            </button>
+                        </div>
+                        <div id="statusUpload_${item.id}" style="font-size:12px; margin-top:6px; font-weight:600;"></div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function uploadFotoKamar(idKamar) {
+            const fileEl = document.getElementById(`fileFoto_${idKamar}`);
+            const ketEl  = document.getElementById(`ketFoto_${idKamar}`);
+            const msgEl  = document.getElementById(`statusUpload_${idKamar}`);
+
+            if (!fileEl.files[0]) {
+                msgEl.textContent = '⚠ Harap pilih file foto terlebih dahulu!';
+                msgEl.style.color = '#ef4444';
+                return;
+            }
+
+            msgEl.textContent = 'Mengunggah foto...';
+            msgEl.style.color = '#4f46e5';
+
+            const formData = new FormData();
+            formData.append('id_kamar', idKamar);
+            formData.append('foto', fileEl.files[0]);
+            if (ketEl && ketEl.value.trim() !== '') {
+                formData.append('keterangan', ketEl.value.trim());
+            }
+
+            fetch('../api/upload_foto.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    msgEl.textContent = '✅ ' + res.message;
+                    msgEl.style.color = '#059669';
+                    fileEl.value = '';
+                    if (ketEl) ketEl.value = '';
+                    showToast(res.message);
+                    setTimeout(muatDataKamar, 800);
+                } else {
+                    msgEl.textContent = '❌ ' + res.message;
+                    msgEl.style.color = '#ef4444';
+                }
+            })
+            .catch(() => {
+                msgEl.textContent = '❌ Terjadi kesalahan jaringan.';
+                msgEl.style.color = '#ef4444';
+            });
+        }
+
+        function hapusFotoSlider(idFoto) {
+            if (!confirm('Hapus foto ini dari slider kamar?')) return;
+
+            fetch('../api/admin_action.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pin: currentAdminPin,
+                    action: 'delete_foto',
+                    id_foto: idFoto
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    muatDataKamar();
+                } else {
+                    alert('Gagal: ' + res.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+

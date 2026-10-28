@@ -93,6 +93,40 @@ input, select { font-family: inherit; }
 }
 .btn-icon:hover { background: var(--border); }
 
+/* Tombol Rahasia Admin (Kecil & Samar) */
+.btn-secret-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    opacity: 0.22;
+    text-decoration: none;
+    margin-left: 4px;
+    transition: opacity 0.2s, transform 0.2s;
+    cursor: pointer;
+    vertical-align: middle;
+}
+.btn-secret-admin:hover {
+    opacity: 0.9;
+    transform: rotate(45deg);
+}
+.nav-secret-dot {
+    position: absolute;
+    right: 8px;
+    bottom: 6px;
+    font-size: 14px;
+    color: var(--text-muted);
+    opacity: 0.18;
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1;
+}
+.nav-secret-dot:hover {
+    opacity: 0.8;
+}
+
 /* Search bar */
 .search-bar-wrap {
     padding: 10px 20px;

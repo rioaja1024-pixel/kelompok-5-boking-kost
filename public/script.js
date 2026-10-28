@@ -189,7 +189,7 @@ function renderSelectOptions(data) {
         opt.dataset.status = item.status;
 
         const hargaFmt = 'Rp ' + parseInt(item.harga).toLocaleString('id-ID');
-        opt.textContent = item.nama_kamar + ' - ' + hargaFmt + '/bln' + (isTerisi ? ' (🔴 Terisi)' : ' (🟢 Tersedia)');
+        opt.textContent = item.nama_kamar + ' - ' + hargaFmt + '/bln' + (isTerisi ? ' (Terisi)' : '');
 
         if (isTerisi) {
             opt.disabled = true;
@@ -372,9 +372,6 @@ function renderKatalog(data) {
                 '<div class="card-stars">★★★★★</div>' +
                 '<div class="card-price-row">' +
                     '<div class="card-price">' + hargaFmt + '<span>/bln</span></div>' +
-                    '<span class="card-status-badge ' + (isTerisi ? 'terisi' : 'kosong') + '">' +
-                        (isTerisi ? 'Terisi' : 'Tersedia') +
-                    '</span>' +
                 '</div>' +
             '</div>';
 

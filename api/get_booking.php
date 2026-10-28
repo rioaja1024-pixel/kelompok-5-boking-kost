@@ -1,28 +1,69 @@
 <?php
+/**
+ * ============================================================================
+ * API: get_booking.php (Berbasis Pemrograman Berorientasi Objek / PBO)
+ * ============================================================================
+ * PENERAPAN PRINSIP PBO:
+ * 1. CLASS & OBJECT:
+ *    - Menggunakan objek BookingKost ($booking = new BookingKost($db)).
+ * 2. ENCAPSULATION:
+ *    - Akses data transaksi melalui method publik getAllBooking() atau prosesTransaksi().
+ * 3. INHERITANCE:
+ *    - BookingKost mewarisi fungsionalitas dari Transaksi.
+ * 4. POLYMORPHISM:
+ *    - Menggunakan implementasi method transaksi polimorfik.
+ * ============================================================================
+ */
+
 header('Content-Type: application/json');
-require_once '../config/koneksi.php';
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 
-$unit = $_POST['unit'] ?? '';
-$nama = $_POST['nama'] ?? '';
-$durasi = $_POST['durasi'] ?? 1;
-$total = $_POST['total'] ?? 0;
+require_once __DIR__ . '/../config/koneksi.php';
 
-if (empty($unit) || empty($nama)) {
-    echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap.']);
-    exit;
-}
+try {
+    $booking = new BookingKost($db);
 
-// 1. Simpan data transaksi ke tabel booking
-$queryBooking = "INSERT INTO booking (nama_unit, nama_pemesan, durasi, total_harga) 
-                 VALUES ('$unit', '$nama', $durasi, $total)";
+    // Jika request adalah GET, kembalikan daftar seluruh data booking
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $dataBooking = $booking->getAllBooking();
+        echo json_encode([
+            'status' => 'success',
+            'data'   => $dataBooking
+        ]);
+        exit;
+    }
 
-if (mysqli_query($koneksi, $queryBooking)) {
-    // 2. Ubah status kamar di tabel kamar menjadi 'terisi'
-    $updateStatus = "UPDATE kamar SET status = 'terisi' WHERE nama_kamar = '$unit'";
-    mysqli_query($koneksi, $updateStatus);
+    // Jika request adalah POST (backward compatibility jika form lama memanggil get_booking.php)
+    $unit   = $_POST['unit'] ?? '';
+    $nama   = $_POST['nama'] ?? '';
+    $durasi = isset($_POST['durasi']) ? (int)$_POST['durasi'] : 1;
+    $total  = isset($_POST['total']) ? (int)$_POST['total'] : 0;
+    $metode = $_POST['metode'] ?? 'Tunai / Cash';
 
-    echo json_encode(['status' => 'success', 'message' => 'Pemesanan berhasil disimpan!']);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan pemesanan.']);
+    if (empty($unit) || empty($nama)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap.']);
+        exit;
+    }
+
+    // ENKAPSULASI: Setter dengan validasi
+    $booking->setNamaUnit($unit);
+    $booking->setNamaPemesan($nama);
+    $booking->setDurasi($durasi);
+    $booking->setTotalHarga($total);
+    $booking->setMetodePembayaran($metode);
+
+    // POLIMORFISME: Eksekusi transaksi
+    $result = $booking->prosesTransaksi();
+    echo json_encode($result);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'status'  => 'error',
+        'message' => $e->getMessage()
+    ]);
 }
 ?>

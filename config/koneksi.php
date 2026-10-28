@@ -1,15 +1,28 @@
 <?php
-$host     = "localhost";
-$user     = "root";
-$password = "";
-$database = "db_booking";
+/**
+ * ============================================================================
+ * CONFIG: koneksi.php
+ * ============================================================================
+ * File inisialisasi OOP & Database Connection
+ * 
+ * Menerapkan prinsip PBO:
+ * - Menggunakan Class Database (Singleton Pattern).
+ * - Memuat class-class model (BaseModel, Kamar, FotoKamar, Transaksi, BookingKost).
+ * - Menyediakan variabel $db (Object Database) dan $koneksi (mysqli) untuk
+ *   kompatibilitas backward.
+ * ============================================================================
+ */
 
-$koneksi = mysqli_connect($host, $user, $password, $database);
+require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/models/BaseModel.php';
+require_once __DIR__ . '/models/FotoKamar.php';
+require_once __DIR__ . '/models/Kamar.php';
+require_once __DIR__ . '/models/Transaksi.php';
+require_once __DIR__ . '/models/BookingKost.php';
 
-if (!$koneksi) {
-    die(json_encode([
-        "status" => "error", 
-        "message" => "Koneksi Database Gagal: " . mysqli_connect_error()
-    ]));
-}
+// CLASS & OBJECT: Mengambil instance objek Database
+$db = Database::getInstance();
+
+// Backward compatibility untuk script yang memerlukan variabel $koneksi
+$koneksi = $db->getConnection();
 ?>

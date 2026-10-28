@@ -1,65 +1,84 @@
 <?php
+/**
+ * ============================================================================
+ * API: upload_foto.php (Berbasis Pemrograman Berorientasi Objek / PBO)
+ * ============================================================================
+ * PENERAPAN PRINSIP PBO:
+ * 1. CLASS & OBJECT:
+ *    - Instansiasi objek Kamar ($kamarModel) dan objek FotoKamar ($fotoModel).
+ * 2. ENCAPSULATION:
+ *    - Validasi ekstensi MIME file, ukuran batas 5MB, pembuatan nama file unik,
+ *      dan penyimpanan direktori diisolasi di dalam method objek prosesUpload().
+ * 3. INHERITANCE:
+ *    - FotoKamar dan Kamar sama-sama mewarisi BaseModel.
+ * 4. POLYMORPHISM:
+ *    - Method simpan() yang di-override dari BaseModel dieksekusi secara otomatis
+ *      saat mencatat foto ke database.
+ * ============================================================================
+ */
+
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/../config/koneksi.php';
 
-// Validasi: pastikan id_kamar dan file foto tersedia
-if (!isset($_POST['id_kamar']) || !isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(['status' => 'error', 'message' => 'Data tidak lengkap atau file bermasalah.']);
+// Validasi request upload awal
+if (!isset($_POST['id_kamar']) || !isset($_FILES['foto'])) {
+    http_response_code(400);
+    echo json_encode([
+        'status'  => 'error',
+        'message' => 'Data tidak lengkap! ID kamar dan file foto wajib diunggah.'
+    ]);
     exit;
 }
 
-$id_kamar = intval($_POST['id_kamar']);
-$keterangan = isset($_POST['keterangan']) && trim($_POST['keterangan']) !== '' 
-    ? mysqli_real_escape_string($koneksi, trim($_POST['keterangan'])) 
-    : 'Foto Kamar';
+$idKamar    = (int)$_POST['id_kamar'];
+$keterangan = isset($_POST['keterangan']) ? trim($_POST['keterangan']) : 'Foto Kamar';
 
-// Validasi tipe file (hanya gambar)
-$allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-$file_type = mime_content_type($_FILES['foto']['tmp_name']);
-if (!in_array($file_type, $allowed_types)) {
-    echo json_encode(['status' => 'error', 'message' => 'Format file tidak didukung. Gunakan JPG, PNG, atau WEBP.']);
-    exit;
-}
-
-// Validasi ukuran file (maks 5MB)
-if ($_FILES['foto']['size'] > 5 * 1024 * 1024) {
-    echo json_encode(['status' => 'error', 'message' => 'Ukuran file terlalu besar. Maksimal 5MB.']);
-    exit;
-}
-
-// Buat nama file unik
-$ext       = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-$nama_file = 'kamar_' . $id_kamar . '_' . time() . '.' . $ext;
-$upload_dir = __DIR__ . '/../public/uploads/';
-if (!is_dir($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
-}
-$target    = $upload_dir . $nama_file;
-
-// Pindahkan file ke folder uploads
-if (move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
-    // 1. Update kolom gambar utama di tabel kamar
-    $query = "UPDATE kamar SET gambar = '$nama_file' WHERE id = $id_kamar";
-    mysqli_query($koneksi, $query);
-
-    // 2. Simpan juga ke tabel foto_kamar agar otomatis masuk ke slider
-    $q_max = "SELECT COALESCE(MAX(urutan), 0) + 1 AS next_urutan FROM foto_kamar WHERE id_kamar = $id_kamar";
-    $res_max = mysqli_query($koneksi, $q_max);
-    $next_urutan = 1;
-    if ($res_max && $row_max = mysqli_fetch_assoc($res_max)) {
-        $next_urutan = (int)$row_max['next_urutan'];
+try {
+    // 1. CLASS & OBJECT: Cek keberadaan kamar target
+    $kamarModel = new Kamar($db);
+    $kamar = $kamarModel->getById($idKamar);
+    if (!$kamar) {
+        http_response_code(404);
+        echo json_encode([
+            'status'  => 'error',
+            'message' => "Kamar dengan ID $idKamar tidak ditemukan."
+        ]);
+        exit;
     }
 
-    $q_insert = "INSERT INTO foto_kamar (id_kamar, nama_file, keterangan, urutan) 
-                 VALUES ($id_kamar, '$nama_file', '$keterangan', $next_urutan)";
-    mysqli_query($koneksi, $q_insert);
+    // 2. ENKAPSULASI: Pemrosesan upload file melalui objek FotoKamar
+    $fotoModel = new FotoKamar($db);
+    $uploadDir = __DIR__ . '/../public/uploads/';
 
+    $uploadResult = $fotoModel->prosesUpload($_FILES['foto'], $idKamar, $keterangan, $uploadDir);
+
+    if ($uploadResult['success']) {
+        // Perbarui juga gambar cover utama pada objek Kamar
+        $kamar->setGambar($uploadResult['file']);
+        $kamar->simpan();
+
+        echo json_encode([
+            'status'  => 'success',
+            'message' => $uploadResult['message'],
+            'file'    => $uploadResult['file']
+        ]);
+    } else {
+        http_response_code(400);
+        echo json_encode([
+            'status'  => 'error',
+            'message' => $uploadResult['message']
+        ]);
+    }
+
+} catch (Exception $e) {
+    http_response_code(500);
     echo json_encode([
-        'status' => 'success', 
-        'message' => 'Foto berhasil diupload dan ditambahkan ke slider kamar!', 
-        'file' => $nama_file
+        'status'  => 'error',
+        'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
     ]);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Gagal memindahkan file upload.']);
 }
 ?>
