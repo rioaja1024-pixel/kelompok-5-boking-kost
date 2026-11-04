@@ -7,27 +7,38 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Sistem Booking Kost Online</title>
-    <link rel="stylesheet" href="style.css?v=9.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=12.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <!-- ===== APP SHELL ===== -->
     <div class="app-shell">
 
-        <!-- TOP NAV -->
+        <!-- TOP NAV (Website Header Navbar) -->
         <header class="top-nav">
             <div class="nav-left">
-                <div class="location-tag">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                    Kost Online
-                    <a href="admin.html" class="btn-secret-admin" title="Pengaturan Kost" aria-label="Admin">⚙</a>
-                </div>
-                <h1 class="nav-title">Pilihan Kost</h1>
+                <a href="index.html" class="nav-brand">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Kost Online</span>
+                </a>
             </div>
-            <button class="btn-icon" id="btnSearch" title="Cari Kamar" type="button">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </button>
+
+            <!-- Website Navigation Links -->
+            <nav class="web-nav-links">
+                <a href="#katalogKamar" class="web-nav-link active">Kamar</a>
+                <a href="javascript:void(0)" onclick="bukaModalBooking()" class="web-nav-link">Pesan Sekarang</a>
+                <a href="admin.html" class="web-nav-link btn-secret-admin" title="Admin">⚙ Kelola</a>
+            </nav>
+
+            <div class="nav-right">
+                <button class="btn-icon" id="btnSearch" title="Cari Kamar" type="button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <button type="button" class="btn-web-booking" onclick="bukaModalBooking()">
+                    Booking Kamar
+                </button>
+            </div>
         </header>
 
         <!-- SEARCH BAR (hidden by default) -->
@@ -35,39 +46,65 @@
             <input type="text" id="searchInput" placeholder="Cari nama kamar kost..." class="search-input">
         </div>
 
-        <!-- FILTER TABS -->
-        <div class="filter-tabs">
-            <button class="tab-btn active" data-filter="all" type="button">Semua</button>
-            <button class="tab-btn" data-filter="kosong" type="button">Tersedia</button>
-            <button class="tab-btn" data-filter="terisi" type="button">Terisi</button>
+        <!-- FILTER TABS & SUB-NAV -->
+        <div class="filter-bar-container">
+            <div class="filter-bar-inner">
+                <div class="filter-label">Kategori Unit:</div>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all" type="button">Semua Kamar</button>
+                    <button class="tab-btn" data-filter="kosong" type="button">🟢 Tersedia</button>
+                    <button class="tab-btn" data-filter="terisi" type="button">🔴 Terisi</button>
+                </div>
+            </div>
         </div>
 
         <!-- MAIN SCROLL AREA -->
         <main class="main-scroll" id="mainScroll">
 
-            <!-- STATUS GRID -->
-            <section class="section">
-                <div class="section-header">
-                    <span class="section-title">Status Kamar</span>
-                    <span class="section-sub" id="jumlahKosong">6 unit tersedia</span>
-                </div>
-                <div id="gridIndikatorKamar" class="status-grid"></div>
-            </section>
-
             <!-- KATALOG KAMAR -->
             <section class="section">
                 <div class="section-header">
-                    <span class="section-title">Pilihan Unit</span>
-                    <span class="section-sub">Klik kamar untuk melihat detail &amp; pesan</span>
+                    <div>
+                        <span class="section-title">Pilihan Unit Kamar</span>
+                        <div class="section-sub">Klik kamar untuk melihat detail sudut ruangan &amp; pesan</div>
+                    </div>
+                    <span class="unit-count-badge" id="jumlahKosong">6 unit</span>
                 </div>
                 <div id="katalogKamar" class="card-grid"></div>
             </section>
 
         </main>
 
-        <!-- BOTTOM NAV (Tanpa Fitur Admin) -->
+        <!-- FOOTER WEBSITE MEWAH (Gaya Hotel / Kost Eksklusif) -->
+        <footer class="web-footer">
+            <div class="footer-inner">
+                <div class="footer-col">
+                    <h3 class="footer-brand">Kost Online</h3>
+                    <p class="footer-desc">Hunian kost modern, bersih, aman, dan nyaman dengan fasilitas lengkap serta fleksibilitas sewa harian maupun bulanan.</p>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">Tautan Cepat</h4>
+                    <ul class="footer-links">
+                        <li><a href="#katalogKamar">Pilihan Unit Kamar</a></li>
+                        <li><a href="javascript:void(0)" onclick="bukaModalBooking()">Pesan Kamar</a></li>
+                        <li><a href="admin.html">Dashboard Pengelola</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-title">Kontak &amp; Lokasi</h4>
+                    <p class="footer-contact">Jl. Telekomunikasi No. 1, Terusan Buahbatu</p>
+                    <p class="footer-contact">WhatsApp: 0821-3835-8117</p>
+                    <p class="footer-contact">Email: info@kostonline.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Kost Online. Seluruh hak cipta dilindungi.
+            </div>
+        </footer>
+
+        <!-- BOTTOM NAV (Floating bar khusus tampilan smartphone) -->
         <nav class="bottom-nav">
-            <button type="button" class="nav-item active" id="navBeranda" onclick="document.getElementById('mainScroll').scrollTo({top: 0, behavior: 'smooth'});">
+            <button type="button" class="nav-item active" id="navBeranda" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span>Beranda</span>
             </button>
@@ -293,6 +330,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=9.0"></script>
+    <script src="script.js?v=12.0"></script>
 </body>
 </html>

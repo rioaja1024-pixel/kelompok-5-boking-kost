@@ -333,16 +333,37 @@ function getDaftarFotoKamar(item) {
     return list;
 }
 
-// Render status grid (kotak indikator ketersediaan)
+// Metadata tipe & fasilitas kamar (sesuai referensi desain modern hotel/kost)
+const kamarMetaMap = {
+    1: { tipe: 'Deluxe Room', guests: 2, baths: 1, size: '4x4 m' },
+    2: { tipe: 'Standard Room', guests: 1, baths: 1, size: '3x4 m' },
+    3: { tipe: 'Double Room', guests: 2, baths: 1, size: '4x4 m' },
+    4: { tipe: 'VIP Room', guests: 2, baths: 1, size: '4x5 m' },
+    5: { tipe: 'Single Room', guests: 1, baths: 1, size: '3x3 m' },
+    6: { tipe: 'Single Room', guests: 1, baths: 1, size: '3x3 m' }
+};
+
+function getKamarMeta(item) {
+    let nomor = parseInt(item.id) || 0;
+    if (!nomor && item.nama_kamar) {
+        let m = item.nama_kamar.match(/\d+/);
+        if (m) nomor = parseInt(m[0]);
+    }
+    return kamarMetaMap[nomor] || { tipe: 'Kost Room', guests: 1, baths: 1, size: '3x4 m' };
+}
+
+// Render status & jumlah unit tersedia
 function renderStatusGrid(data) {
+    const sub = document.getElementById('jumlahKosong');
+    if (sub && Array.isArray(data)) {
+        const kosong = data.filter(function (d) { return d.status !== 'terisi'; }).length;
+        sub.textContent = kosong + ' unit tersedia';
+    }
+
     const grid = document.getElementById('gridIndikatorKamar');
-    const sub  = document.getElementById('jumlahKosong');
-    if (!grid) return;
+    if (!grid) return; // Elemen sudah dihapus dari tampilan web
 
     grid.innerHTML = '';
-    const kosong = data.filter(function (d) { return d.status !== 'terisi'; }).length;
-    if (sub) sub.textContent = kosong + ' unit tersedia';
-
     data.forEach(function (item) {
         const isTerisi = item.status === 'terisi';
         const chip = document.createElement('div');
@@ -359,7 +380,7 @@ function renderStatusGrid(data) {
     });
 }
 
-// Render katalog kamar dalam bentuk kartu
+// Render katalog kamar dalam bentuk kartu (Gaya Mewah / Hotel Elegance sesuai referensi)
 function renderKatalog(data) {
     const container = document.getElementById('katalogKamar');
     if (!container) return;
@@ -369,6 +390,7 @@ function renderKatalog(data) {
         const isTerisi = item.status === 'terisi';
         const fotoSrc  = getFotoKamar(item);
         const hargaFmt = 'Rp ' + parseInt(item.harga).toLocaleString('id-ID');
+        const meta     = getKamarMeta(item);
 
         const card = document.createElement('div');
         card.className = 'kamar-card' + (isTerisi ? ' terisi' : '');
@@ -378,21 +400,44 @@ function renderKatalog(data) {
         card.innerHTML =
             '<div class="card-img-wrap">' +
                 '<img src="' + fotoSrc + '" alt="' + item.nama_kamar + '" ' +
-                    'onerror="this.src=\'https://placehold.co/300x200/e8e7ff/4f46e5?text=No+Photo\'">' +
+                    'onerror="this.src=\'https://placehold.co/400x260/e8e7ff/4f46e5?text=No+Photo\'">' +
+                '<div class="card-price-overlay">' +
+                    '<span>From ' + hargaFmt + ' /bln</span>' +
+                '</div>' +
+                '<div class="card-status-pill ' + (isTerisi ? 'terisi' : 'kosong') + '">' +
+                    (isTerisi ? 'Terisi' : 'Tersedia') +
+                '</div>' +
             '</div>' +
             '<div class="card-body">' +
-                '<div class="card-name">' + item.nama_kamar + '</div>' +
-                '<div class="card-loc">' +
-                    '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
-                    '<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>' +
-                    '<circle cx="12" cy="9" r="2.5"/></svg>' +
-                    ' Kost Nyaman' +
+                '<h3 class="card-title-serif">' + meta.tipe + '</h3>' +
+                '<div class="card-unit-name">' + item.nama_kamar + '</div>' +
+                '<div class="card-meta-row">' +
+                    '<span class="card-meta-item">' +
+                        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+                        ' ' + meta.guests + ' Orang' +
+                    '</span>' +
+                    '<span class="card-meta-item">' +
+                        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v7M20 12v7M2 19h20M4 14h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2z"/></svg>' +
+                        ' ' + meta.baths + ' Km Mandi' +
+                    '</span>' +
+                    '<span class="card-meta-item">' +
+                        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' +
+                        ' ' + meta.size +
+                    '</span>' +
                 '</div>' +
-                '<div class="card-stars">★★★★★</div>' +
-                '<div class="card-price-row">' +
-                    '<div class="card-price">' + hargaFmt + '<span>/bln</span></div>' +
-                '</div>' +
+                '<button type="button" class="btn-card-book ' + (isTerisi ? 'disabled' : '') + '">' +
+                    (isTerisi ? 'TERISI' : 'BOOK NOW') +
+                '</button>' +
             '</div>';
+
+        // Klik tombol BOOK NOW -> langsung buka form booking untuk kamar ini
+        const btnBook = card.querySelector('.btn-card-book');
+        if (btnBook && !isTerisi) {
+            btnBook.addEventListener('click', function (e) {
+                e.stopPropagation();
+                pilihKamar(item.nama_kamar, item.harga);
+            });
+        }
 
         // Klik kartu -> buka popup detail kamar dengan foto slider
         card.addEventListener('click', function () {

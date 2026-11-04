@@ -8,7 +8,7 @@
 
 ## 📌 1. Judul dan Informasi Mahasiswa
 
-* **Nama:** Rio Permana,Muamar Renji Kordawi,Alinda Restu Desiyana gi
+* **Nama:** Rio Permana,Muamar Renji Kordawi,Alinda Restu Desiyana
 * **NIM:**  42425030,42425031,42425021
 * **Kelas:** Informatika - Semester 3
 * **Mata Kuliah:** Pemrograman Berorientasi Objek (PBO)
