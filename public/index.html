@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Sistem Booking Kost Online</title>
-    <link rel="stylesheet" href="style.css?v=7.0">
+    <link rel="stylesheet" href="style.css?v=9.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -58,70 +58,9 @@
             <section class="section">
                 <div class="section-header">
                     <span class="section-title">Pilihan Unit</span>
-                    <span class="section-sub">Klik kamar untuk pesan</span>
+                    <span class="section-sub">Klik kamar untuk melihat detail &amp; pesan</span>
                 </div>
                 <div id="katalogKamar" class="card-grid"></div>
-            </section>
-
-            <!-- FORM BOOKING -->
-            <section class="section booking-section" id="sectionBooking">
-                <div class="section-header">
-                    <span class="section-title">Form Pemesanan Kost</span>
-                </div>
-
-                <form id="formBooking" class="booking-form">
-                    <!-- Unit terpilih dropdown / select -->
-                    <div class="form-group">
-                        <label class="form-label" for="unitPilihan">Pilihan Unit Kamar</label>
-                        <div class="input-wrap">
-                            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
-                            <select id="unitPilihan" name="unit" class="form-input form-select" required>
-                                <option value="">-- Pilih Unit Kamar --</option>
-                                <option value="Kamar 1" data-harga="500000">Kamar 1 - Rp 500.000/bln</option>
-                                <option value="Kamar 2" data-harga="500000">Kamar 2 - Rp 500.000/bln</option>
-                                <option value="Kamar 3" data-harga="550000">Kamar 3 - Rp 550.000/bln</option>
-                                <option value="Kamar 4" data-harga="550000">Kamar 4 - Rp 550.000/bln</option>
-                                <option value="Kamar 5" data-harga="600000">Kamar 5 - Rp 600.000/bln</option>
-                                <option value="Kamar 6" data-harga="600000">Kamar 6 - Rp 600.000/bln</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Nama pemesan -->
-                    <div class="form-group">
-                        <label class="form-label" for="namaPemesan">Nama Lengkap Pemesan</label>
-                        <div class="input-wrap">
-                            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                            <input type="text" id="namaPemesan" name="nama" placeholder="Masukkan nama kamu" class="form-input" required>
-                        </div>
-                    </div>
-
-                    <!-- Durasi -->
-                    <div class="form-group">
-                        <label class="form-label">Durasi Sewa (Bulan)</label>
-                        <div class="durasi-control">
-                            <button type="button" class="durasi-btn" id="btnKurang" aria-label="Kurangi durasi">−</button>
-                            <div class="durasi-display">
-                                <input type="number" id="durasiBulan" name="durasi" value="1" min="1" class="durasi-input" required>
-                                <span class="durasi-label">Bulan</span>
-                            </div>
-                            <button type="button" class="durasi-btn" id="btnTambah" aria-label="Tambah durasi">+</button>
-                        </div>
-                    </div>
-
-                    <!-- Total harga -->
-                    <div class="total-box">
-                        <span class="total-label">Total Harga</span>
-                        <span class="total-nilai" id="totalHargaDisplay">Rp 0</span>
-                        <input type="hidden" id="totalHargaVal" name="total" value="0">
-                    </div>
-
-                    <!-- Submit -->
-                    <button type="submit" class="btn-book-now" id="btnSubmitBooking">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-                        Lanjut ke Pembayaran
-                    </button>
-                </form>
             </section>
 
         </main>
@@ -136,7 +75,7 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 <span>Kamar</span>
             </button>
-            <button type="button" class="nav-item" id="navBooking" onclick="document.getElementById('sectionBooking').scrollIntoView({behavior:'smooth'})">
+            <button type="button" class="nav-item" id="navBooking" onclick="bukaModalBooking()">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <span>Booking</span>
             </button>
@@ -144,6 +83,80 @@
         </nav>
 
     </div><!-- /app-shell -->
+
+    <!-- ===== MODAL POPUP FORM BOOKING ===== -->
+    <div id="modalBooking" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-booking-sheet">
+            <div class="modal-header-booking">
+                <div class="modal-booking-title-wrap">
+                    <span class="modal-step-badge">Langkah 1 dari 2</span>
+                    <h2 class="modal-title" style="text-align:left; margin:0;">Form Pemesanan Kost</h2>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="tutupModalBooking()" aria-label="Tutup Form">✕</button>
+            </div>
+
+            <form id="formBooking" class="booking-form" style="margin-top: 14px;">
+                <!-- Unit terpilih dropdown / select -->
+                <div class="form-group">
+                    <label class="form-label" for="unitPilihan">Pilihan Unit Kamar</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
+                        <select id="unitPilihan" name="unit" class="form-input form-select" required>
+                            <option value="">-- Pilih Unit Kamar --</option>
+                            <option value="Kamar 1" data-harga="500000">Kamar 1 - Rp 500.000/bln</option>
+                            <option value="Kamar 2" data-harga="500000">Kamar 2 - Rp 500.000/bln</option>
+                            <option value="Kamar 3" data-harga="550000">Kamar 3 - Rp 550.000/bln</option>
+                            <option value="Kamar 4" data-harga="550000">Kamar 4 - Rp 550.000/bln</option>
+                            <option value="Kamar 5" data-harga="600000">Kamar 5 - Rp 600.000/bln</option>
+                            <option value="Kamar 6" data-harga="600000">Kamar 6 - Rp 600.000/bln</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Nama pemesan -->
+                <div class="form-group">
+                    <label class="form-label" for="namaPemesan">Nama Lengkap Pemesan</label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        <input type="text" id="namaPemesan" name="nama" placeholder="Masukkan nama kamu" class="form-input" required>
+                    </div>
+                </div>
+
+                <!-- Durasi -->
+                <div class="form-group">
+                    <label class="form-label">Tipe &amp; Durasi Sewa</label>
+                    <!-- Toggle Harian / Bulanan -->
+                    <div class="tipe-durasi-toggle">
+                        <button type="button" class="tipe-btn" id="btnTipeHarian" data-tipe="harian">🌙 Harian</button>
+                        <button type="button" class="tipe-btn active" id="btnTipeBulanan" data-tipe="bulanan">📅 Bulanan</button>
+                    </div>
+                    <input type="hidden" id="tipeDurasi" name="tipe_durasi" value="bulanan">
+                    <div class="durasi-control">
+                        <button type="button" class="durasi-btn" id="btnKurang" aria-label="Kurangi durasi">−</button>
+                        <div class="durasi-display">
+                            <input type="number" id="durasiBulan" name="durasi" value="1" min="1" class="durasi-input" required>
+                            <span class="durasi-label" id="labelSatuanDurasi">Bulan</span>
+                        </div>
+                        <button type="button" class="durasi-btn" id="btnTambah" aria-label="Tambah durasi">+</button>
+                    </div>
+                    <div class="durasi-info-bar" id="infoHargaSatuan"></div>
+                </div>
+
+                <!-- Total harga -->
+                <div class="total-box">
+                    <span class="total-label">Total Harga</span>
+                    <span class="total-nilai" id="totalHargaDisplay">Rp 0</span>
+                    <input type="hidden" id="totalHargaVal" name="total" value="0">
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-book-now" id="btnSubmitBooking">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                    Lanjut ke Pembayaran
+                </button>
+            </form>
+        </div>
+    </div>
 
     <div id="modalDetail" class="modal-overlay" style="display:none;">
         <div class="detail-sheet">
@@ -280,6 +293,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=7.0"></script>
+    <script src="script.js?v=9.0"></script>
 </body>
 </html>

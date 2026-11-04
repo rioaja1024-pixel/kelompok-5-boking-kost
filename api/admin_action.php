@@ -49,9 +49,9 @@ if ($reqPin !== ADMIN_PIN) {
 $action = isset($input['action']) ? trim($input['action']) : '';
 
 try {
-    $kamarModel   = new Kamar($db);
-    $bookingModel = new BookingKost($db);
-    $fotoModel    = new FotoKamar($db);
+    $kamarModel     = new Kamar($db);
+    $pemesananModel = new Pemesanan($db);
+    $fotoModel      = new FotoKamar($db);
 
     switch ($action) {
         // 1. STATISTIK DASHBOARD ADMIN
@@ -69,7 +69,7 @@ try {
                 }
             }
 
-            $daftarBooking = $bookingModel->getAllBooking();
+            $daftarBooking = $pemesananModel->getAllPemesanan();
             $totalBooking  = count($daftarBooking);
             $totalUang     = 0;
             foreach ($daftarBooking as $b) {
@@ -158,7 +158,7 @@ try {
                 exit;
             }
 
-            $success = $bookingModel->hapusBooking($idBooking, $kembalikan);
+            $success = $pemesananModel->batalkanPemesanan($idBooking, $kembalikan);
             if ($success) {
                 echo json_encode([
                     'status'  => 'success',

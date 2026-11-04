@@ -89,12 +89,16 @@ function initFilterTabs() {
 }
 
 // =====================================================
-//  DURASI STEPPER (+ / -)
+//  DURASI STEPPER (+ / -) & TIPE TOGGLE (Harian/Bulanan)
 // =====================================================
 function initDurasiStepper() {
-    const inputDurasi = document.getElementById('durasiBulan');
-    const btnKurang   = document.getElementById('btnKurang');
-    const btnTambah   = document.getElementById('btnTambah');
+    const inputDurasi  = document.getElementById('durasiBulan');
+    const btnKurang    = document.getElementById('btnKurang');
+    const btnTambah    = document.getElementById('btnTambah');
+    const btnHarian    = document.getElementById('btnTipeHarian');
+    const btnBulanan   = document.getElementById('btnTipeBulanan');
+    const tipeDurasiEl = document.getElementById('tipeDurasi');
+
     if (!inputDurasi) return;
 
     inputDurasi.addEventListener('input', hitungTotalHarga);
@@ -115,6 +119,21 @@ function initDurasiStepper() {
             hitungTotalHarga();
         });
     }
+
+    // Toggle tipe durasi Harian / Bulanan
+    function setTipe(tipe) {
+        if (tipeDurasiEl) tipeDurasiEl.value = tipe;
+        const labelEl = document.getElementById('labelSatuanDurasi');
+        if (labelEl) labelEl.textContent = tipe === 'harian' ? 'Hari' : 'Bulan';
+        inputDurasi.value = 1;
+
+        if (btnHarian)  btnHarian.classList.toggle('active', tipe === 'harian');
+        if (btnBulanan) btnBulanan.classList.toggle('active', tipe === 'bulanan');
+        hitungTotalHarga();
+    }
+
+    if (btnHarian)  btnHarian.addEventListener('click',  function () { setTipe('harian'); });
+    if (btnBulanan) btnBulanan.addEventListener('click', function () { setTipe('bulanan'); });
 }
 
 // =====================================================
@@ -626,6 +645,25 @@ function tutupDetail() {
 }
 
 // =====================================================
+//  MODAL FORM BOOKING (POPUP TERSENDIRI)
+// =====================================================
+function bukaModalBooking() {
+    const modalBooking = document.getElementById('modalBooking');
+    if (modalBooking) {
+        modalBooking.style.display = 'flex';
+        // Pastikan kalkulasi harga terhitung
+        hitungTotalHarga();
+    }
+}
+
+function tutupModalBooking() {
+    const modalBooking = document.getElementById('modalBooking');
+    if (modalBooking) {
+        modalBooking.style.display = 'none';
+    }
+}
+
+// =====================================================
 //  PILIH KAMAR DARI MODAL DETAIL
 // =====================================================
 function pilihKamar(namaUnit, harga) {
@@ -641,28 +679,46 @@ function pilihKamar(namaUnit, harga) {
     }
     hitungTotalHarga();
 
-    // Tutup modal detail dan scroll ke form booking
+    // Tutup modal detail kamar lalu buka modal popup pemesanan
     tutupDetail();
     setTimeout(function () {
-        const sec = document.getElementById('sectionBooking');
-        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-    }, 250);
+        bukaModalBooking();
+    }, 200);
 }
 
 // =====================================================
 //  HITUNG TOTAL HARGA
 // =====================================================
 function hitungTotalHarga() {
-    const durasiInput = document.getElementById('durasiBulan');
+    const durasiInput  = document.getElementById('durasiBulan');
+    const tipeDurasiEl = document.getElementById('tipeDurasi');
+    const infoBar      = document.getElementById('infoHargaSatuan');
+
     let durasi = parseInt(durasiInput ? durasiInput.value : 1) || 1;
     if (durasi < 1) { 
         durasi = 1; 
         if (durasiInput) durasiInput.value = 1; 
     }
 
-    const total = hargaPerBulanDipilih * durasi;
+    const tipe = tipeDurasiEl ? tipeDurasiEl.value : 'bulanan';
+    const hargaHarian = hargaPerBulanDipilih > 0 ? Math.ceil(hargaPerBulanDipilih / 30) : 0;
+
+    let total = 0;
+    if (tipe === 'harian') {
+        total = hargaHarian * durasi;
+        if (infoBar && hargaHarian > 0) {
+            infoBar.textContent = '💡 Tarif harian: Rp ' + hargaHarian.toLocaleString('id-ID') + ' / hari';
+            infoBar.style.display = 'block';
+        } else if (infoBar) {
+            infoBar.style.display = 'none';
+        }
+    } else {
+        total = hargaPerBulanDipilih * durasi;
+        if (infoBar) infoBar.style.display = 'none';
+    }
+
     const totalDisplay = document.getElementById('totalHargaDisplay');
-    const totalVal = document.getElementById('totalHargaVal');
+    const totalVal     = document.getElementById('totalHargaVal');
 
     if (totalDisplay) {
         totalDisplay.textContent = 'Rp ' + total.toLocaleString('id-ID');
@@ -703,12 +759,16 @@ function initFormBooking() {
             nama: namaInput,
             unit: unitPilihan,
             durasi: durasiInput,
+            tipe_durasi: document.getElementById('tipeDurasi') ? document.getElementById('tipeDurasi').value : 'bulanan',
             total: totalVal,
             totalFormatted: totalDisplay
         };
 
-        // Tampilkan modal pilihan metode pembayaran sebelum diproses
-        bukaPembayaran(totalDisplay);
+        // Tutup modal form booking, kemudian buka modal metode pembayaran
+        tutupModalBooking();
+        setTimeout(function () {
+            bukaPembayaran(totalDisplay);
+        }, 150);
     });
 }
 
@@ -749,6 +809,7 @@ function pilihMetode(metodeName) {
     formData.append('nama', bookedData.nama);
     formData.append('unit', bookedData.unit);
     formData.append('durasi', bookedData.durasi);
+    formData.append('tipe_durasi', bookedData.tipe_durasi || 'bulanan');
     formData.append('total', bookedData.total);
     formData.append('metode', metodeName);
 
@@ -776,7 +837,8 @@ function pilihMetode(metodeName) {
 function selesaikanBooking(bookedData, metodeName) {
     pendingBookingData = null;
 
-    // Tutup modal pembayaran
+    // Tutup modal booking dan pembayaran
+    tutupModalBooking();
     tutupPembayaran();
 
     // Reset form booking
@@ -784,6 +846,17 @@ function selesaikanBooking(bookedData, metodeName) {
     if (formBooking) formBooking.reset();
     hargaPerBulanDipilih = 0;
     unitDipilihData = null;
+    // Reset tipe durasi ke default bulanan
+    const tipeDurasiEl = document.getElementById('tipeDurasi');
+    if (tipeDurasiEl) tipeDurasiEl.value = 'bulanan';
+    const labelSatuan = document.getElementById('labelSatuanDurasi');
+    if (labelSatuan) labelSatuan.textContent = 'Bulan';
+    const btnHarian  = document.getElementById('btnTipeHarian');
+    const btnBulanan = document.getElementById('btnTipeBulanan');
+    if (btnHarian)  btnHarian.classList.remove('active');
+    if (btnBulanan) btnBulanan.classList.add('active');
+    const infoBar = document.getElementById('infoHargaSatuan');
+    if (infoBar) infoBar.style.display = 'none';
     hitungTotalHarga();
 
     // Update status kamar langsung di memori tampilan
@@ -803,6 +876,7 @@ function selesaikanBooking(bookedData, metodeName) {
         bookedData.nama,
         bookedData.unit,
         bookedData.durasi,
+        bookedData.tipe_durasi || 'bulanan',
         metodeName,
         bookedData.totalFormatted
     );
@@ -811,25 +885,28 @@ function selesaikanBooking(bookedData, metodeName) {
 // =====================================================
 //  MODAL SUKSES & WHATSAPP
 // =====================================================
-function tampilPopupSukses(nama, unit, durasi, metode, total) {
-    const popupNama = document.getElementById('popupNama');
-    const popupUnit = document.getElementById('popupUnit');
+function tampilPopupSukses(nama, unit, durasi, tipeDurasi, metode, total) {
+    const popupNama   = document.getElementById('popupNama');
+    const popupUnit   = document.getElementById('popupUnit');
     const popupDurasi = document.getElementById('popupDurasi');
     const popupMetode = document.getElementById('popupMetode');
-    const popupTotal = document.getElementById('popupTotal');
+    const popupTotal  = document.getElementById('popupTotal');
 
-    if (popupNama) popupNama.textContent = nama;
-    if (popupUnit) popupUnit.textContent = unit;
-    if (popupDurasi) popupDurasi.textContent = durasi + ' Bulan';
+    const satuanLabel = tipeDurasi === 'harian' ? 'Hari' : 'Bulan';
+    const tipeLabel   = tipeDurasi === 'harian' ? 'Harian' : 'Bulanan';
+
+    if (popupNama)   popupNama.textContent   = nama;
+    if (popupUnit)   popupUnit.textContent   = unit;
+    if (popupDurasi) popupDurasi.textContent = durasi + ' ' + satuanLabel + ' (' + tipeLabel + ')';
     if (popupMetode) popupMetode.textContent = metode;
-    if (popupTotal) popupTotal.textContent = total;
+    if (popupTotal)  popupTotal.textContent  = total;
 
     // Susun pesan WhatsApp konfirmasi
     const pesan =
         'Halo, saya ingin konfirmasi booking kost:\n\n' +
         '📋 Unit Kamar: ' + unit + '\n' +
         '👤 Nama Pemesan: ' + nama + '\n' +
-        '📅 Durasi Sewa: ' + durasi + ' Bulan\n' +
+        '📅 Durasi Sewa: ' + durasi + ' ' + satuanLabel + ' (' + tipeLabel + ')\n' +
         '💳 Metode Bayar: ' + metode + '\n' +
         '💰 Total Tagihan: ' + total + '\n\n' +
         'Mohon konfirmasi pesanan saya. Terima kasih! 🙏';
@@ -881,6 +958,13 @@ function initModals() {
     if (modalPembayaran) {
         modalPembayaran.addEventListener('click', function (e) {
             if (e.target === modalPembayaran) tutupPembayaran();
+        });
+    }
+
+    const modalBooking = document.getElementById('modalBooking');
+    if (modalBooking) {
+        modalBooking.addEventListener('click', function (e) {
+            if (e.target === modalBooking) tutupModalBooking();
         });
     }
 

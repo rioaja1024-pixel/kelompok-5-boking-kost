@@ -17,6 +17,8 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/models/BaseModel.php';
 require_once __DIR__ . '/models/FotoKamar.php';
 require_once __DIR__ . '/models/Kamar.php';
+require_once __DIR__ . '/models/Payment.php';
+require_once __DIR__ . '/models/Pemesanan.php';
 require_once __DIR__ . '/models/Transaksi.php';
 require_once __DIR__ . '/models/BookingKost.php';
 

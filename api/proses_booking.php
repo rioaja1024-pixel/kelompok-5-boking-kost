@@ -5,16 +5,20 @@
  * ============================================================================
  * PENERAPAN PRINSIP PBO:
  * 1. CLASS & OBJECT:
- *    - Instansiasi objek BookingKost ($booking = new BookingKost($db)).
+ *    - Instansiasi objek Pemesanan: $pemesanan = new Pemesanan($db).
+ *    - Instansiasi objek Payment polimorfik melalui PaymentFactory::create().
  * 2. ENCAPSULATION (ENKAPSULASI):
- *    - Data request dimasukkan ke dalam objek melalui method Setter:
- *      setNamaPemesan(), setNamaUnit(), setDurasi(), setTotalHarga(), setMetodePembayaran().
- *    - Validasi data berjalan secara otomatis di dalam setter.
+ *    - Data request dimasukkan ke objek Pemesanan melalui Setter:
+ *      setNamaPemesan(), setNamaUnit(), setDurasi(), setTotalHarga(), setPayment().
+ *    - Aturan validasi dijalankan secara aman di dalam method Setter.
  * 3. INHERITANCE (PEWARISAN):
- *    - BookingKost mewarisi properti dan method dari abstract class Transaksi.
+ *    - Pemesanan mewarisi BaseModel (properti $db, $id, $createdAt).
+ *    - Objek Payment (CashPayment, QrisPayment, BankTransferPayment, EWalletPayment)
+ *      mewarisi superclass abstract Payment.
  * 4. POLYMORPHISM (POLIMORFISME):
- *    - Memanggil method polimorfik $booking->prosesTransaksi() yang meng-override
- *      method abstract dari Transaksi untuk memproses transaksi kost secara aman.
+ *    - Pemesanan meng-override method simpan(), getDetail(), toArray() dari BaseModel.
+ *    - Payment mengeksekusi processPayment() dan getPaymentInstructions() sesuai
+ *      metode pembayaran yang dipilih.
  * ============================================================================
  */
 
@@ -38,11 +42,12 @@ if (empty($input)) {
 }
 
 // Ekstraksi parameter
-$nama   = isset($input['nama']) ? trim($input['nama']) : (isset($input['nama_pemesan']) ? trim($input['nama_pemesan']) : '');
-$unit   = isset($input['unit']) ? trim($input['unit']) : (isset($input['nama_unit']) ? trim($input['nama_unit']) : '');
-$durasi = isset($input['durasi']) ? (int)$input['durasi'] : 1;
-$total  = isset($input['total']) ? (int)$input['total'] : (isset($input['total_harga']) ? (int)$input['total_harga'] : 0);
-$metode = isset($input['metode']) ? trim($input['metode']) : (isset($input['metode_pembayaran']) ? trim($input['metode_pembayaran']) : 'Tunai / Cash');
+$nama        = isset($input['nama']) ? trim($input['nama']) : (isset($input['nama_pemesan']) ? trim($input['nama_pemesan']) : '');
+$unit        = isset($input['unit']) ? trim($input['unit']) : (isset($input['nama_unit']) ? trim($input['nama_unit']) : '');
+$durasi      = isset($input['durasi']) ? (int)$input['durasi'] : 1;
+$tipe_durasi = isset($input['tipe_durasi']) ? trim($input['tipe_durasi']) : 'bulanan';
+$total       = isset($input['total']) ? (int)$input['total'] : (isset($input['total_harga']) ? (int)$input['total_harga'] : 0);
+$metode      = isset($input['metode']) ? trim($input['metode']) : (isset($input['metode_pembayaran']) ? trim($input['metode_pembayaran']) : 'Tunai / Cash');
 
 // Validasi input awal
 if (empty($nama) || empty($unit)) {
@@ -55,22 +60,27 @@ if (empty($nama) || empty($unit)) {
 }
 
 try {
-    // CLASS & OBJECT: Membuat objek BookingKost
-    $booking = new BookingKost($db);
+    // 1. CLASS & OBJECT: Membuat instance objek Pemesanan
+    $pemesanan = new Pemesanan($db);
 
-    // ENKAPSULASI: Memasukkan nilai menggunakan Setter dengan validasi
-    $booking->setNamaUnit($unit);
-    $booking->setNamaPemesan($nama);
-    $booking->setDurasi($durasi > 0 ? $durasi : 1);
+    // 2. ENKAPSULASI: Memasukkan nilai menggunakan Setter dengan validasi otomatis
+    $pemesanan->setNamaPemesan($nama);
+    $pemesanan->setNamaUnit($unit);
+    $pemesanan->setTipeDurasi($tipe_durasi);
+    $pemesanan->setDurasi($durasi > 0 ? $durasi : 1);
+    
     if ($total > 0) {
-        $booking->setTotalHarga($total);
+        $pemesanan->setTotalHarga($total);
     } else {
-        $booking->hitungTotal(); // Menghitung otomatis jika total tidak dikirim
+        $pemesanan->hitungTotal(); // Menghitung otomatis jika total belum terisi
     }
-    $booking->setMetodePembayaran($metode);
 
-    // POLIMORFISME: Menjalankan eksekusi transaksi yang telah di-override
-    $hasil = $booking->prosesTransaksi();
+    // 3. POLYMORPHISM & FACTORY: Membuat objek Payment polimorfik sesuai metode yang dipilih
+    $payment = PaymentFactory::create($metode, $pemesanan->getTotalHarga());
+    $pemesanan->setPayment($payment);
+
+    // 4. Memproses alur pemesanan secara utuh ke database MySQL
+    $hasil = $pemesanan->prosesPemesanan();
 
     if ($hasil['status'] === 'error') {
         http_response_code(400);
