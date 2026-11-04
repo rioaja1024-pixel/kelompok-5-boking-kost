@@ -8,8 +8,10 @@
 
 ## 📌 1. Judul dan Informasi Mahasiswa
 
-* **Nama:** Rio Permana *(dan Anggota Kelompok)*
-* **NIM:** *(Isikan NIM Lengkap di sini)*
+* **Nama:** Rio Permana * Muamar Renji Kordawi * * Alinda Restu Desiyana *
+* **NIM:** * 42425030 *
+           * 42425031 *
+           * 42425030 *
 * **Kelas:** Informatika - Semester 3
 * **Mata Kuliah:** Pemrograman Berorientasi Objek (PBO)
 * **Dosen Pengampu:** Fathulloh, ST, M.Kom
