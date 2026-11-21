@@ -1,30 +1,26 @@
 <?php
 /**
  * ============================================================================
- * CONFIG: koneksi.php
+ * BOOTSTRAP LOADER: config/koneksi.php
  * ============================================================================
- * File inisialisasi OOP & Database Connection
+ * Inisialisasi Database Connection & Autoloading Core Models (OOP)
  * 
  * Menerapkan prinsip PBO:
- * - Menggunakan Class Database (Singleton Pattern).
- * - Memuat class-class model (BaseModel, Kamar, FotoKamar, Transaksi, BookingKost).
- * - Menyediakan variabel $db (Object Database) dan $koneksi (mysqli) untuk
- *   kompatibilitas backward.
+ * - Singleton Database Connection
+ * - Core Domain Models: BaseModel, FotoKamar, Kamar, Payment, Pemesanan
  * ============================================================================
  */
 
 require_once __DIR__ . '/Database.php';
-require_once __DIR__ . '/models/BaseModel.php';
-require_once __DIR__ . '/models/FotoKamar.php';
-require_once __DIR__ . '/models/Kamar.php';
-require_once __DIR__ . '/models/Payment.php';
-require_once __DIR__ . '/models/Pemesanan.php';
-require_once __DIR__ . '/models/Transaksi.php';
-require_once __DIR__ . '/models/BookingKost.php';
 
-// CLASS & OBJECT: Mengambil instance objek Database
+// Inisialisasi koneksi singleton
 $db = Database::getInstance();
-
-// Backward compatibility untuk script yang memerlukan variabel $koneksi
 $koneksi = $db->getConnection();
+
+// Autoloading 5 Model Inti dari direktori models/
+require_once __DIR__ . '/../models/BaseModel.php';
+require_once __DIR__ . '/../models/FotoKamar.php';
+require_once __DIR__ . '/../models/Kamar.php';
+require_once __DIR__ . '/../models/Payment.php';
+require_once __DIR__ . '/../models/Pemesanan.php';
 ?>
