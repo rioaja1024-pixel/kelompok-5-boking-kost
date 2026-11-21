@@ -3,83 +3,86 @@
 > **Ujian Tengah Semester (UTS) — Pemrograman Berorientasi Objek (PBO)**  
 > **Program Studi:** Informatika | **Semester:** 3 (Tiga)  
 > **Dosen Pengampu:** Fathulloh, ST, M.Kom  
+> **Sifat Ujian:** Take Home  
 
 ---
 
 ## 📌 1. Judul dan Informasi Mahasiswa
 
-* **Nama:** Rio Permana,Muamar Renji Kordawi,Alinda Restu Desiyana
-* **NIM:**  42425030,42425031,42425021
-* **Kelas:** Informatika - Semester 3
+* **Nama Anggota Kelompok & NIM:**
+  1. **Rio Permana** — NIM: **42425030**
+  2. **Muamar Renji Kordawi** — NIM: **42425031**
+  3. **Alinda Restu Desiyana** — NIM: **42425021**
+* **Kelas:** Informatika — Semester 3 (Tiga)
 * **Mata Kuliah:** Pemrograman Berorientasi Objek (PBO)
 * **Dosen Pengampu:** Fathulloh, ST, M.Kom
-* **Tema Aplikasi:** **Sistem Pemesanan & Pengelolaan Kost Online** *(Kategori: dll / Sistem Pemesanan & Manajemen Sewa)*
+* **Tema Aplikasi:** **Sistem Pemesanan & Pengelolaan Kost Online** *(Kategori: dll / Sistem Pemesanan & Manajemen Properti Sewa)*
 
 ---
 
 ## 📖 2. Deskripsi Ringkas Aplikasi
 
 ### Latar Belakang
-Proses pencarian dan pemesanan kamar kost umumnya masih dilakukan secara konvensional atau melalui pencatatan manual yang rawan kekeliruan, mulai dari ketidaktahuan calon penyewa mengenai ketersediaan unit kamar secara *real-time*, tidak tersedianya pilihan durasi sewa yang fleksibel (harian maupun bulanan), hingga bukti pemesanan yang tidak terdokumentasi rapi.
+Proses pencarian dan reservasi kamar kost umumnya masih dilakukan secara konvensional atau pencatatan manual yang rentan kesalahan. Calon penyewa kerap kesulitan mengetahui ketersediaan kamar secara *real-time*, tidak memiliki fleksibilitas durasi sewa (harian maupun bulanan), serta tidak tersedianya bukti pemesanan yang transparan dan terintegrasi langsung dengan konfirmasi pengelola.
 
 ### Kegunaan Aplikasi
-Aplikasi **Sistem Kost Online** ini dirancang untuk mendigitalkan proses reservasi kamar kost:
-1. **Bagi Calon Penghuni Kost:** Memudahkan penjelajahan unit kamar dengan galeri foto interaktif (*multi-slide swipe*), mengecek status kamar secara instan (tersedia/terisi), memilih durasi sewa fleksibel (**Harian** atau **Bulanan**), serta melakukan booking dengan alur terpisah yang intuitif dan dilanjutkan pemilihan metode pembayaran multi-channel (QRIS, E-Wallet, Tunai/Cash) beserta konfirmasi WhatsApp otomatis.
-2. **Bagi Pengelola/Pemilik Kost:** Mempermudah monitoring okupansi unit kamar, perubahan tarif/harga, manajemen album foto sudut ruangan, serta pencatatan transaksi masuk melalui Dashboard Admin terintegrasi yang aman.
+Aplikasi **Sistem Kost Online** ini dirancang untuk mendigitalkan seluruh proses reservasi dan administrasi kamar kost:
+1. **Bagi Calon Penghuni Kost:** Memudahkan eksplorasi unit kamar dengan tampilan editorial butik dan galeri foto interaktif (*multi-slide carousel*), mengecek status ketersediaan secara instan (*Tersedia / Terisi*), memilih durasi sewa fleksibel (**Harian** atau **Bulanan**), melakukan booking dengan formulir terpisah yang praktis, serta memilih metode pembayaran multi-channel (QRIS, E-Wallet, Tunai/Cash) yang terhubung langsung ke WhatsApp pemilik kost.
+2. **Bagi Pengelola/Pemilik Kost:** Mempermudah monitoring okupansi unit kamar, penyesuaian tarif/harga sewa, manajemen album foto sudut ruangan, serta pencatatan transaksi masuk melalui Dashboard Pengelola terintegrasi yang diamankan dengan autentikasi PIN.
 
 ---
 
 ## 🧱 3. Penerapan Konsep Pemrograman Berorientasi Objek (OOP)
 
-Aplikasi dibangun di atas pondasi arsitektur **OOP PHP murni** dan database **MySQL** dengan menerapkan 4 pilar utama PBO:
+Seluruh logika bisnis pada lapisan backend PHP dibangun murni dengan menerapkan 4 pilar dasar OOP:
 
 ### A. Class & Object
-* **Representasi Entitas:** Setiap komponen sistem dimodelkan ke dalam class terpisah, antara lain:
-  * `Database`: Pengelola koneksi basis data tunggal (*Design Pattern Singleton*).
+* **Representasi Entitas Nyata:** Sistem dimodelkan ke dalam class-class terpisah dengan tanggung jawab tunggal (*Single Responsibility Principle*):
+  * `Database`: Blueprint pengelola koneksi database MySQL menggunakan *Singleton Pattern*.
   * `Kamar`: Entitas unit kamar kost, tarif, status ketersediaan, dan relasi galeri foto.
-  * `FotoKamar`: Entitas album foto sudut ruangan (multi-slide carousel).
-  * `Pemesanan`: Entitas transaksi booking penyewa kost.
+  * `FotoKamar`: Entitas album foto sudut ruangan (multi-slide viewer).
+  * `Pemesanan`: Entitas transaksi reservasi penyewa kost.
   * `Payment`: Entitas abstrak pengolahan pembayaran.
-* **Instansiasi Objek:** Objek dibuat secara dinamis saat menangani permintaan API, misalnya:  
+* **Instansiasi Objek Dinamis:** Objek dibuat saat menangani request API, misalnya:  
   `$pemesanan = new Pemesanan($db);`  
-  `$payment = PaymentFactory::create($metode, $total);`
+  `$payment = PaymentFactory::create($metode, $totalHarga);`
 
 ### B. Encapsulation (Enkapsulasi)
-* Semua atribut penting pada class dideklarasikan dengan hak akses `private` atau `protected` untuk mencegah manipulasi data secara ilegal dari luar class.
-* Akses dan pengubahan data diatur melalui metode **Getter** dan **Setter** yang dilengkapi dengan **validasi logika bisnis ketat**:
-  * `Pemesanan::$namaPemesan` (private): Setter memvalidasi bahwa nama tidak boleh kosong string/spasi.
-  * `Pemesanan::$durasi` (private): Setter memvalidasi batas minimal durasi sewa (minimal 1 hari/bulan).
-  * `Pemesanan::$tipeDurasi` (private): Setter memfilter tipe valid hanya `'harian'` atau `'bulanan'`.
-  * `Kamar::$harga` (private): Setter memvalidasi bahwa tarif kamar tidak boleh negatif.
-  * `Database::$instance` (private static): Konstruktor dibuat privat agar instance MySQL hanya dapat dibuat melalui method `getInstance()`.
+* Seluruh atribut penting pada class dideklarasikan dengan tingkat akses `private` atau `protected` untuk melindungi integritas data (*data hiding*):
+  * `Pemesanan::$namaPemesan` (private): Setter memvalidasi bahwa nama pemesan tidak boleh berupa string kosong/hanya spasi.
+  * `Pemesanan::$durasi` (private): Setter memvalidasi durasi sewa minimal bernilai 1.
+  * `Pemesanan::$tipeDurasi` (private): Setter membatasi pilihan hanya `'harian'` atau `'bulanan'`.
+  * `Kamar::$harga` (private): Setter memastikan tarif kamar tidak boleh bernilai negatif.
+  * `Database::$instance` (private static): Konstruktor dibuat privat agar instance MySQL hanya dapat diinisialisasi melalui method `getInstance()` (*mencegah duplikasi koneksi*).
 
 ### C. Inheritance (Pewarisan)
-* **Superclass Abstrak `BaseModel` (`config/models/BaseModel.php`):**  
-  Menyediakan properti bersama (`protected $db`, `protected $id`, `protected $createdAt`) dan metode dasar.
-  * Diturunkan (*extends*) oleh class:
+* **Superclass Abstrak `BaseModel` (`models/BaseModel.php`):**  
+  Menyediakan properti dasar (`protected $db`, `protected $id`, `protected $createdAt`) dan metode dasar.
+  * Diturunkan (*extends*) oleh subclass:
     * `class Kamar extends BaseModel`
     * `class FotoKamar extends BaseModel`
     * `class Pemesanan extends BaseModel`
-* **Superclass Abstrak `Payment` (`config/models/Payment.php`):**  
-  Menyediakan template pembayaran (`amount`, `status`, `transactionCode`).
-  * Diturunkan (*extends*) oleh class spesifik:
+* **Superclass Abstrak `Payment` (`models/Payment.php`):**  
+  Menyediakan kerangka pemrosesan pembayaran (`amount`, `status`, `transactionCode`).
+  * Diturunkan (*extends*) oleh subclass spesifik:
     * `class CashPayment extends Payment`
     * `class QrisPayment extends Payment`
     * `class EWalletPayment extends Payment`
     * `class BankTransferPayment extends Payment`
 
 ### D. Polymorphism (Polimorfisme)
-* **Method Overriding pada Model:**  
-  Class `BaseModel` mendefinisikan method abstract:
+* **Method Overriding pada Model (`BaseModel`):**  
+  Class `BaseModel` menetapkan metode abstract:
   * `abstract public function simpan(): bool;`
   * `abstract public function getDetail(): array;`
   * `abstract public function toArray(): array;`  
-  Masing-masing subclass (`Kamar`, `Pemesanan`, `FotoKamar`) mengimplementasikan logika penyimpanan dan serialisasi data secara spesifik sesuai entitasnya.
-* **Polimorfisme Pemrosesan Pembayaran:**  
+  Masing-masing subclass (`Kamar`, `Pemesanan`, `FotoKamar`) meng-override dan mengimplementasikan logika penyimpanan serta serialisasi data yang unik sesuai entitasnya.
+* **Polimorfisme Pemrosesan Pembayaran (`Payment`):**  
   Setiap turunan `Payment` meng-override method `processPayment()` dan `getPaymentInstructions()`:
-  * `QrisPayment`: Menghasilkan instruksi scan QR code instan dan tautan simulasi gateway.
-  * `EWalletPayment`: Menghasilkan nomor tagihan dompet digital (DANA, OVO, GoPay).
-  * `CashPayment`: Menghasilkan instruksi bayar di lokasi saat serah terima kunci kost.
+  * `QrisPayment`: Menghasilkan instruksi scan QR code instan dan tautan gateway.
+  * `EWalletPayment`: Menghasilkan instruksi transfer dompet digital (GoPay, OVO, DANA, ShopeePay).
+  * `CashPayment`: Menghasilkan instruksi pembayaran tunai di tempat saat serah terima kunci kost.
+  * Pembuatan objek dilakukan secara polimorfik melalui `PaymentFactory::create($metode, $amount)`.
 
 ---
 
@@ -272,93 +275,96 @@ classDiagram
 
 ### Alur Kerja Pengguna (User Flow)
 ```
-1. Buka Beranda ───► Lihat Status Kamar (Kosong / Terisi)
+1. Akses Website ────────► Hero Section Editorial & Tinjauan Unit Kamar
           │
           ▼
-2. Klik Kartu Kamar ───► Buka Modal Slider Foto & Detail Kamar
+2. Klik Kartu Kamar ─────► Modal Interaktif Slider Foto Berbagai Sudut Ruangan
           │
-          ▼ (Tekan "Pilih Unit Ini")
+          ▼ (Klik tombol "BOOK NOW" atau "Pilih Unit Ini")
 3. Modal Form Pemesanan Muncul (Langkah 1)
-   ├── Pilih Tipe Sewa: Harian (🌙) atau Bulanan (📅)
-   ├── Atur Durasi Sewa (+ / -)
-   ├── Masukkan Nama Lengkap Pemesan
-   └── Tekan "Lanjut ke Pembayaran"
+   ├── Unit kamar langsung terpilih otomatis
+   ├── Pilih Tipe Durasi Sewa: Harian (🌙) atau Bulanan (📅)
+   ├── Atur Durasi (+ / -) dengan kalkulasi tarif proporsional otomatis
+   ├── Input Nama Lengkap Pemesan
+   └── Klik "Lanjut ke Pembayaran"
           │
           ▼
 4. Modal Pilihan Metode Pembayaran (Langkah 2)
-   ├── Pilihan: E-Wallet / QRIS / Tunai
-   └── Sistem OOP memproses validasi, simpan database, & ubah status kamar
+   ├── Pilih: E-Wallet / QRIS / Tunai (Cash)
+   └── Backend OOP memvalidasi, menyimpan ke database MySQL, & mengupdate status kamar
           │
           ▼
 5. Popup Sukses Booking
-   └── Bukti Pemesanan Terbit + Tombol Teruskan ke WhatsApp Pemilik Kost
+   └── Struk digital terbit + Tombol konfirmasi otomatis ke WhatsApp Pengelola Kost
 ```
 
 ### Daftar Fitur Utama:
-1. **Katalog Unit Kamar Dinamis:** Menampilkan seluruh daftar kamar kost lengkap dengan status ketersediaan (*badge* hijau untuk Tersedia, merah untuk Terisi) dan filter cepat.
-2. **Interactive Photo Slider (Touch & Swipe):** Menampilkan berbagai sudut foto ruangan untuk setiap kamar yang dapat digeser menggunakan layar sentuh ponsel, *drag* mouse di PC, maupun tombol panah navigasi.
-3. **Pemisahan Tampilan Form Booking:** Tampilan utama dibuat bersih; formulir pemesanan hanya muncul sebagai modal dialog saat pengguna ingin melakukan pemesanan.
-4. **Pilihan Durasi Fleksibel (Harian & Bulanan):** Fitur pemilihan sewa harian (dengan tarif per hari otomatis terhitung proporsional) atau sewa bulanan.
-5. **Multi-Metode Pembayaran (Polymorphic Payment):** Mendukung pembayaran via QRIS, E-Wallet, dan Cash dengan generator kode transaksi instan.
-6. **Integrasi WhatsApp API:** Membantu penyewa mengirimkan konfirmasi reservasi langsung ke WhatsApp pengelola dengan draf pesan otomatis.
-7. **Dashboard Admin Rahasia:** Pengelolaan data kamar, harga, galeri foto ruangan, dan histori booking melalui antarmuka khusus dengan autentikasi PIN.
+1. **Desain Editorial Butik Properti:** Tampilan web responsif dengan tipografi klasik *Fraunces* dan *DM Sans*, palet hangat (*Warm Cream, Terracotta, Deep Brown*), bebas dari kesan template kaku.
+2. **Katalog Unit Kamar Dinamis:** Menampilkan kartu kamar lengkap dengan overlay harga, indikator ketersediaan, spesifikasi kapasitas tamu, kamar mandi, dan dimensi luas ruangan.
+3. **Interactive Photo Slider (Touch & Swipe):** Galeri sudut ruangan per unit kamar yang mendukung *swipe* pada layar sentuh ponsel, *drag* mouse, dan tombol navigasi panah.
+4. **Pemisahan Formulir Pemesanan:** Halaman depan bersih dan fokus menampilkan unit; form pemesanan muncul dalam bentuk modal popup saat pemesan siap bertransaksi.
+5. **Fleksibilitas Durasi Sewa (Harian & Bulanan):** Fitur pemesanan harian (tarif dihitung otomatis proporsional terhadap harga bulanan) maupun bulanan.
+6. **Multi-Metode Pembayaran Polimorfik:** Dukungan metode bayar QRIS, E-Wallet, dan Cash dengan generator kode pembayaran instan.
+7. **Integrasi WhatsApp Direct Confirmation:** Penyewa dapat langsung mengirimkan bukti konfirmasi booking ke nomor pengelola kost dengan format teks otomatis.
+8. **Dashboard Pengelola (Admin) Terproteksi PIN:** Fitur manajemen status kamar, pengubahan harga, riwayat booking, dan upload foto kamar (PIN default: `1234`).
 
 ---
 
 ## 💻 5. Cara Menjalankan Program (How to Run)
 
 ### Prasyarat Sistem:
-* Web Server Apache & PHP (Minimal PHP 7.4 atau PHP 8.x) — direkomendasikan menggunakan **XAMPP**.
+* Web Server Apache & PHP (PHP 7.4 / PHP 8.x) — direkomendasikan menggunakan **XAMPP**.
 * Database MySQL / MariaDB.
-* Web Browser modern (Google Chrome, Microsoft Edge, atau Mozilla Firefox).
+* Web Browser modern (Google Chrome, Microsoft Edge, Mozilla Firefox, dll).
 
 ### Langkah-Langkah Menjalankan:
 1. **Clone / Unduh Repository:**
-   Letakkan folder proyek di dalam direktori `htdocs` server web lokal:
+   Salin folder proyek ini ke dalam direktori `htdocs` XAMPP Anda:
    ```bash
-   # Jalankan di direktori c:/xampp/htdocs/
+   # Masuk ke direktori xampp/htdocs/
    git clone https://github.com/riopr325/KELOMPOK-BOKING-KOST-.git "projek kelompok"
    ```
 
-2. **Jalankan XAMPP:**
-   Buka aplikasi **XAMPP Control Panel**, kemudian klik **Start** pada modul **Apache** dan **MySQL**.
+2. **Jalankan Apache & MySQL di XAMPP:**
+   Buka **XAMPP Control Panel**, lalu klik tombol **Start** pada modul **Apache** dan modul **MySQL**.
 
-3. **Impor Database:**
-   * Buka browser dan akses `http://localhost/phpmyadmin/`.
+3. **Impor Database MySQL:**
+   * Buka browser dan kunjungi `http://localhost/phpmyadmin/`.
    * Buat database baru bernama: `db_booking`.
-   * Buka menu **Import** dan pilih berkas `database.sql` yang ada di direktori root proyek ini, lalu klik **Go / Kirim**.
+   * Pilih menu **Import**, pilih file `database.sql` yang ada di root proyek ini, kemudian klik **Import / Kirim**.
 
-4. **Konfigurasi Database (Bila Diperlukan):**
-   Pengaturan koneksi tersimpan di berkas `config/Database.php`:
+4. **Konfigurasi Database (Jika Diperlukan):**
+   Pengaturan koneksi terpusat pada file `config/Database.php`:
    ```php
-   private string $host     = 'localhost';
-   private string $user     = 'root';
-   private string $password = '';
-   private string $database = 'db_booking';
+   private string $host     = "localhost";
+   private string $user     = "root";
+   private string $password = "";
+   private string $database = "db_booking";
    ```
 
 5. **Akses Aplikasi Melalui Browser:**
-   * **Halaman Utama Calon Penyewa:**
+   * **Halaman Utama (Penyewa):**
      ```
-     http://localhost/projek%20kelompok/public/index.html
+     http://localhost/projek%20kelompok/
      ```
-   * **Halaman Pengelola / Dashboard Admin:**
+     *(Otomatis diarahkan ke `public/index.html`)*
+   * **Dashboard Pengelola (Admin):**
      ```
      http://localhost/projek%20kelompok/public/admin.html
-     (Default PIN Admin: 1234)
+     (PIN Akses: 1234)
      ```
 
 ---
 
 ## 📸 6. Tampilan Antarmuka (Screenshot)
 
-| Tampilan Beranda & Katalog | Slider Foto Kamar Interaktif |
+| Hero Section & Navigasi Editorial | Katalog Unit Kamar Asimetris |
 | :---: | :---: |
-| Halaman utama dengan daftar kamar & ketersediaan real-time | Modal interaktif untuk melihat foto detail sudut ruangan |
+| Tampilan beranda bergaya brosur properti butik dengan tipografi Fraunces & DM Sans | Kartu unit kamar lengkap dengan overlay harga, spesifikasi, dan tombol Book Now |
 
-| Form Pemesanan (Harian / Bulanan) | Pilihan Pembayaran & Bukti Sukses |
+| Slider Foto Sudut Kamar Interaktif | Form Booking & Metode Pembayaran |
 | :---: | :---: |
-| Formulir terpisah dengan toggle sewa Harian / Bulanan | Pemilihan metode bayar & popup konfirmasi WhatsApp |
+| Modal galeri foto kamar yang dapat di-swipe untuk melihat berbagai sudut ruangan | Alur pemesanan popup harian/bulanan berlanjut ke multi-metode pembayaran |
 
 ---
 
@@ -367,35 +373,33 @@ classDiagram
 ```text
 projek kelompok/
 ├── api/
-│   ├── admin_action.php       # Controller API aksi admin (OOP)
-│   ├── get_booking.php        # API pemanggilan daftar booking
-│   ├── get_kamar.php          # API katalog kamar & relasi foto
-│   ├── proses_booking.php     # Controller API pemrosesan transaksi booking
-│   └── upload_foto.php        # API upload foto kamar kost
+│   ├── admin_action.php       # Controller API aksi pengelola (OOP)
+│   ├── get_booking.php        # API pemanggilan data riwayat pemesanan
+│   ├── get_kamar.php          # API katalog kamar dan relasi foto
+│   ├── proses_booking.php     # Controller API pemrosesan transaksi pemesanan
+│   └── upload_foto.php        # API upload foto sudut kamar kost
 ├── config/
-│   ├── Database.php           # Class Database (Singleton Pattern)
-│   ├── koneksi.php            # Bootstrap autoloader class model
-│   └── models/
-│       ├── BaseModel.php      # Abstract Superclass Model
-│       ├── BookingKost.php    # Legacy model transaksi kost
-│       ├── FotoKamar.php      # Class model foto sudut kamar
-│       ├── Kamar.php          # Class model entitas kamar
-│       ├── Payment.php        # Abstract Payment & Subclasses Polymorphic
-│       ├── Pemesanan.php      # Class model transaksi reservasi
-│       └── Transaksi.php      # Abstract base transaction
+│   ├── Database.php           # Class Database (Singleton Pattern, Enkapsulasi)
+│   └── koneksi.php            # Bootstrap Autoloader Model & Database Instance
+├── models/
+│   ├── BaseModel.php          # Abstract Superclass Model (Inheritance & Polymorphism)
+│   ├── FotoKamar.php          # Model entitas album foto kamar kost
+│   ├── Kamar.php              # Model entitas kamar, status, dan harga
+│   ├── Payment.php            # Abstract Payment & Subclasses Polymorphic
+│   └── Pemesanan.php          # Model transaksi reservasi (harian & bulanan)
 ├── public/
-│   ├── uploads/               # Direktori penyimpanan foto kamar
-│   ├── admin.html             # Antarmuka Dashboard Admin
-│   ├── index.html             # Antarmuka Utama Reservasi Kost
-│   ├── script.js              # Interaksi frontend & AJAX caller
-│   └── style.css              # Tata letak & styling responsif
-├── database.sql               # Skrip inisialisasi tabel basis data
+│   ├── uploads/               # Direktori berkas foto kamar kost
+│   ├── admin.html             # Antarmuka Dashboard Pengelola (PIN: 1234)
+│   ├── index.html             # Antarmuka Utama Reservasi Kost (Editorial Layout)
+│   ├── script.js              # Script interaksi UI & AJAX frontend
+│   └── style.css              # Desain antarmuka responsif editorial
+├── .htaccess                  # Konfigurasi Apache routing root & cache-control
+├── database.sql               # Skrip inisialisasi tabel basis data MySQL
+├── index.php                  # Entry point redirect ke public/index.html
 └── README.md                  # Dokumentasi laporan UTS PBO
 ```
 
 ---
 
 **Ujian Tengah Semester (UTS) — Pemrograman Berorientasi Objek (PBO)**  
-*Dibuat dengan penuh dedikasi untuk memenuhi standar akademik teknik informatika.*
-#   k e l o m p o k - 5 - b o k i n g - k o s t  
- 
+*Program Studi Informatika — Semester 3 (Tiga)*
