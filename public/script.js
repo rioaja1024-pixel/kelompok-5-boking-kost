@@ -23,7 +23,6 @@ let daftarKamarData = [...dataKamarDefault];
 // =====================================================
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Render data default langsung agar layar tidak kosong dan pilihan langsung ada
-    renderStatusGrid(daftarKamarData);
     renderKatalog(daftarKamarData);
     renderSelectOptions(daftarKamarData);
 
@@ -179,7 +178,6 @@ function muatDataKamar() {
             if (Array.isArray(data) && data.length > 0) {
                 daftarKamarData = data;
                 renderSelectOptions(data);
-                renderStatusGrid(data);
                 renderKatalog(data);
             }
         })
@@ -187,7 +185,6 @@ function muatDataKamar() {
             console.warn('Mode lokal aktif: menggunakan daftar kamar bawaan.', err);
             // Tetap pastikan render dengan data bawaan
             renderSelectOptions(daftarKamarData);
-            renderStatusGrid(daftarKamarData);
             renderKatalog(daftarKamarData);
         });
 }
@@ -350,34 +347,6 @@ function getKamarMeta(item) {
         if (m) nomor = parseInt(m[0]);
     }
     return kamarMetaMap[nomor] || { tipe: 'Kost Room', guests: 1, baths: 1, size: '3x4 m' };
-}
-
-// Render status & jumlah unit tersedia
-function renderStatusGrid(data) {
-    const sub = document.getElementById('jumlahKosong');
-    if (sub && Array.isArray(data)) {
-        const kosong = data.filter(function (d) { return d.status !== 'terisi'; }).length;
-        sub.textContent = kosong + ' unit tersedia';
-    }
-
-    const grid = document.getElementById('gridIndikatorKamar');
-    if (!grid) return; // Elemen sudah dihapus dari tampilan web
-
-    grid.innerHTML = '';
-    data.forEach(function (item) {
-        const isTerisi = item.status === 'terisi';
-        const chip = document.createElement('div');
-        chip.className = 'status-chip ' + (isTerisi ? 'terisi' : 'kosong');
-        chip.innerHTML =
-            '<span class="chip-name">' + item.nama_kamar + '</span>' +
-            '<span class="chip-status">' + (isTerisi ? '🔴 Terisi' : '🟢 Kosong') + '</span>';
-        
-        chip.addEventListener('click', function () {
-            bukaDetail(item);
-        });
-
-        grid.appendChild(chip);
-    });
 }
 
 // Render katalog kamar dalam bentuk kartu (Gaya Mewah / Hotel Elegance sesuai referensi)
@@ -910,7 +879,6 @@ function selesaikanBooking(bookedData, metodeName) {
         kmr.status = 'terisi';
     }
     renderSelectOptions(daftarKamarData);
-    renderStatusGrid(daftarKamarData);
     renderKatalog(daftarKamarData);
 
     // Sinkronkan kembali dengan data fresh dari database

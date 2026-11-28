@@ -168,6 +168,19 @@ class Kamar extends BaseModel {
     // ========================================================================
 
     /**
+     * Memetakan data baris database ke atribut objek Kamar
+     * @param array $row
+     */
+    private function hydrate(array $row): void {
+        $this->setId((int)$row['id']);
+        $this->setNamaKamar($row['nama_kamar']);
+        $this->setHarga((int)$row['harga']);
+        $this->setGambar($row['gambar'] ?? null);
+        $this->setStatus($row['status'] ?? 'kosong');
+        $this->muatFotos();
+    }
+
+    /**
      * Mengambil semua data kamar dari database beserta relasi foto
      * @return array Array of associative arrays
      */
@@ -179,13 +192,7 @@ class Kamar extends BaseModel {
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $kamar = new Kamar($this->db);
-                $kamar->setId((int)$row['id']);
-                $kamar->setNamaKamar($row['nama_kamar']);
-                $kamar->setHarga((int)$row['harga']);
-                $kamar->setGambar($row['gambar']);
-                $kamar->setStatus($row['status'] ?? 'kosong');
-                $kamar->muatFotos();
-
+                $kamar->hydrate($row);
                 $list[] = $kamar->toArray();
             }
         }
@@ -204,12 +211,7 @@ class Kamar extends BaseModel {
         $result = $this->db->query($sql);
 
         if ($result && $row = $result->fetch_assoc()) {
-            $this->setId((int)$row['id']);
-            $this->setNamaKamar($row['nama_kamar']);
-            $this->setHarga((int)$row['harga']);
-            $this->setGambar($row['gambar']);
-            $this->setStatus($row['status'] ?? 'kosong');
-            $this->muatFotos();
+            $this->hydrate($row);
             return $this;
         }
 
@@ -226,12 +228,7 @@ class Kamar extends BaseModel {
         $result = $this->db->query($sql);
 
         if ($result && $row = $result->fetch_assoc()) {
-            $this->setId((int)$row['id']);
-            $this->setNamaKamar($row['nama_kamar']);
-            $this->setHarga((int)$row['harga']);
-            $this->setGambar($row['gambar']);
-            $this->setStatus($row['status'] ?? 'kosong');
-            $this->muatFotos();
+            $this->hydrate($row);
             return $this;
         }
 

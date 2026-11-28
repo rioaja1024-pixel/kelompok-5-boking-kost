@@ -15,7 +15,6 @@ require_once __DIR__ . '/Database.php';
 
 // Inisialisasi koneksi singleton
 $db = Database::getInstance();
-$koneksi = $db->getConnection();
 
 // Autoloading 5 Model Inti dari direktori models/
 require_once __DIR__ . '/../models/BaseModel.php';
